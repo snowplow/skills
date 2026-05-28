@@ -1,0 +1,13 @@
+{
+  "name": "snowplow",
+  "displayName": "Snowplow",
+  "description": "Snowplow skills bundled with the Snowplow MCP server. Includes tracking design, implementation guidance, Signals, pipeline infrastructure, console operations, and troubleshooting.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Snowplow Analytics",
+    "url": "https://snowplow.io"
+  },
+  "homepage": "https://docs.snowplow.io/docs/llms-support/snowplow-mcp/",
+  "license": "Apache-2.0",
+  "keywords": ["snowplow", "analytics", "tracking", "mcp", "signals"]
+}

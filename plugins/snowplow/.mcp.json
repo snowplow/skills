@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "snowplow": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://console.snowplowanalytics.com/api/agent/mcp",
+        "3334",
+        "--static-oauth-client-info",
+        "{\"client_id\":\"NxCcdyu13Cr4umnIYw70evvUyRXRvyWf\"}"
+      ]
+    }
+  }
+}

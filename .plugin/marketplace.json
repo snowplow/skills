@@ -1,0 +1,15 @@
+{
+  "name": "snowplow",
+  "owner": {
+    "name": "Snowplow Analytics",
+    "url": "https://snowplow.io"
+  },
+  "description": "Official Snowplow plugins for Claude Code",
+  "plugins": [
+    {
+      "name": "snowplow",
+      "source": "./plugins/snowplow",
+      "description": "Snowplow skills bundled with the Snowplow MCP server for tracking design, pipeline operations, Signals, and troubleshooting."
+    }
+  ]
+}
