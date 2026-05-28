@@ -10,6 +10,8 @@ tools:
   - list_source_apps
   - list_pipelines
   - list_micros
+  - fetch_documentation_index
+  - fetch_documentation_page
 ---
 
 # Implementation Guidance
