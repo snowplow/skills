@@ -58,11 +58,11 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - List existing alerts
 - Create new alerts for email or Slack notifications
 - Alert types: ALERT (immediate) or DIGEST (periodic summary)
-- Filters: by app ID, issue type (ValidationError, ResolutionError), or specific data structures
+- Filters: by app ID, issue type (ValidationError, ResolutionError), or specific schemas
 - For Slack alerts, user must have Slack integration set up first
 - Update or delete existing alerts
 
-### Data Products / Tracking Plans
+### Tracking Plans
 
 - List existing tracking plans (formerly called data products)
 - Get a specific tracking plan with all its event specs using get_tracking_plan
@@ -79,12 +79,12 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 
 - Retrieve event volume metrics for event specifications
 - Shows total event counts, breakdown by app ID, and last seen timestamps
-- Filter by tracking plan, source data structure, schema version, or event spec status (draft/published)
+- Filter by tracking plan, source schema, schema version, or event spec status (draft/published)
 
 ### Data Catalog
 
-- List all tracked data structures (events and entities) with their relationships
-- Search the catalog by name, vendor, or description to find specific data structures
+- List all tracked schemas (events and entities) with their relationships
+- Search the catalog by name, vendor, or description to find specific schemas
 - See which events link to which entities and vice versa
 
 ## Workflow Recipes

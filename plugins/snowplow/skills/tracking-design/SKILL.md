@@ -28,9 +28,9 @@ Tracking design is the process of defining what events to track, what data to in
 
 How tracking design is represented in the warehouse:
 
-- Event data structures are columns in the events table pre-fixed with `unstruct_event_`.
-- Entity data structures are columns in the events table pre-fixed with `context_`.
-- Event Specifications can be identified from the `context_com_snowplowanalytics_snowplow_event_specification` column, which contains event specification and tracking plan metadata (id and name).
+- Event schemas are columns in the events table pre-fixed with `unstruct_event_`.
+- Entity schemas are columns in the events table pre-fixed with `context_`.
+- Event specifications can be identified from the `context_com_snowplowanalytics_snowplow_event_specification` column, which contains event specification and tracking plan metadata (id and name).
 
 It is important you never create schemas or event specifications without explicit user confirmation. Always present your design proposal first, then ask "Does this look correct? I'll create these schemas and event specification once you confirm." Only proceed with API calls after receiving confirmation.
 
@@ -57,11 +57,11 @@ Ask clarifying questions to understand what the customer wants to track:
 
 Apply Snowplow best practices:
 
-- **Entity-first approach**: Model real-world objects as entities, events describe actions on those objects. Prefer placing information in entities rather than as properties directly on event data structures — information relevant to multiple events should always be in entities. Only use event properties for data that is truly specific to a single event and would never be reused elsewhere.
+- **Entity-first approach**: Model real-world objects as entities, events describe actions on those objects. Prefer placing information in entities rather than as properties directly on event schemas — information relevant to multiple events should always be in entities. Only use event properties for data that is truly specific to a single event and would never be reused elsewhere.
 - **Naming conventions**:
   - **Tracking Plans**: Title Case describing business domain (e.g., "Ecommerce Checkout Flow", "Mobile App User Engagement")
   - **Event Specifications**: Verb-Noun Title Case describing the action (e.g., "Add To Cart", "User Signup", "Complete Checkout")
-  - **Data Structures**: snake_case for schema names (e.g., `add_to_cart`, `product`)
+  - **Schemas**: snake_case for schema names (e.g., `add_to_cart`, `product`)
   - **Properties**: snake_case, and avoid redundant parent-type prefixes (e.g., use `id` not `product_id` inside a `product` entity)
 - **Schema reuse**: Always check Iglu Central and existing organization schemas before creating new ones
 - **Versioning**: Always create new schema versions, never edit published schemas
@@ -116,7 +116,7 @@ When designing event specs within a tracking plan that has source applications:
 - **Required fields only**: Only mark fields as required if they're ALWAYS present in every occurrence
 - **Entity granularity**: One entity type per schema (don't combine user + product in one schema)
 - **Version bumps**: Snowplow uses SchemaVer (MAJOR-MINOR-PATCH). MAJOR for breaking changes (adding/removing required fields, changing field types, making optional fields required). Non-breaking changes (adding optional fields, changing field sizes, documentation updates) increment MINOR or PATCH.
-- **Tracking plan design**: Each plan should have a clear purpose and scope around a business domain (e.g., "Ecommerce Checkout Flow", not "All User Events"). Assign designated ownership for data quality. Group related events that share a common domain. Design for reusability — avoid campaign-specific or overly narrow plans that limit sharing of data structures.
+- **Tracking plan design**: Each plan should have a clear purpose and scope around a business domain (e.g., "Ecommerce Checkout Flow", not "All User Events"). Assign designated ownership for data quality. Group related events that share a common domain. Design for reusability — avoid campaign-specific or overly narrow plans that limit sharing of schemas.
 - **Single API call**: Create event specifications with event and all entities together - no separate add operations
 
 ## Event Granularity
@@ -138,7 +138,7 @@ Example: A `product_action` schema with a `type` discriminator:
 - "Remove From Cart" event spec → property instructions: `type` allowed values `[remove_from_cart]`
 - "View Product" event spec → property instructions: `type` allowed values `[view]`
 
-Property instructions also apply to entity data structures. If a `product` entity has a `category` field, different event specs can restrict which categories are valid for their context.
+Property instructions also apply to entity schemas. If a `product` entity has a `category` field, different event specs can restrict which categories are valid for their context.
 
 When creating an event spec, check if the chosen event schema is already used by other event specs in the same tracking plan. If so:
 1. Fetch the existing event specs to see their property instructions
@@ -148,7 +148,7 @@ When creating an event spec, check if the chosen event schema is already used by
 Also proactively suggest property instructions when:
 - The schema has an obvious discriminator field (type, action, category, status)
 - The user chooses the grouped actions pattern explicitly
-- Multiple event specs in the same tracking plan reference the same data structure
+- Multiple event specs in the same tracking plan reference the same schema
 
 ## Common Patterns
 
@@ -169,7 +169,7 @@ Also proactively suggest property instructions when:
 
 ## Terminology
 
-"Data Products" is the former name for Tracking Plans — they are the same concept. If a user refers to "data products", treat it as a reference to tracking plans.
+If a user says "data product", interpret it as "tracking plan" — same concept, older name.
 
 ## Important Notes
 
