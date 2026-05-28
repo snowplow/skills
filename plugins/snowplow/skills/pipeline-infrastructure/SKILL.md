@@ -1,6 +1,6 @@
 ---
 name: pipeline-infrastructure
-description: Explore pipeline infrastructure including collector configuration, enrichment settings, pipeline metrics (throughput, latency, loaders), mini pipelines, and Micro instances. Use when users ask about their setup, endpoints, pipeline health, performance, or how their pipeline is configured.
+description: Explore pipeline infrastructure including collector configuration, enrichment settings, pipeline metrics (throughput, latency, loaders), mini pipelines, and Micro instances. Use when users ask about their setup, endpoints, pipeline health, performance, or how their pipeline is configured. Use this skill whenever a user asks about pipeline state, throughput, or how their pipeline is wired up. Triggers: pipeline status, collector endpoint, enrichment latency, loader, throughput, CNAME, cookie policy.
 tools:
   - list_pipelines
   - get_pipeline

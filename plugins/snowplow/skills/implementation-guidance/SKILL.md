@@ -1,6 +1,6 @@
 ---
 name: implementation-guidance
-description: Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code.
+description: Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker.
 tools:
   - list_schemas
   - get_schema_properties

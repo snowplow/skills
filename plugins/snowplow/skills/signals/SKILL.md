@@ -1,6 +1,6 @@
 ---
 name: signals
-description: Manage Snowplow Signals - attribute keys, attribute groups, services, interventions, and publishing. Use when users want to configure real-time customer attributes, create services for pull-based access, or set up interventions for push-based actions.
+description: Manage Snowplow Signals - attribute keys, attribute groups, services, interventions, and publishing. Use when users want to configure real-time customer attributes, create services for pull-based access, or set up interventions for push-based actions. Use this skill for any real-time customer-attribute, personalisation, or activation question, even if the user does not name Signals. Triggers: customer attributes, feature store, real-time scoring, intervention, attribute group, personalisation.
 tools:
   - signals_list_tables
   - signals_list_timestamp_columns
