@@ -38,7 +38,7 @@ It is important you never create schemas or event specifications without explici
 
 - List existing schemas and tracking plans using the list_schemas and list_tracking_plans tools to understand the current state of the customer's tracking setup.
 - If working within a specific tracking plan, use get_tracking_plan to fetch the plan details along with all its event specs. Otherwise, use list_event_specifications (with the optional dataProductId filter to scope to a specific plan if known).
-- If the tracking plan has source applications, those source apps define entities that are automatically inherited by every event spec in the plan — fetch them with get_source_app to understand which entities are already covered before designing new event specs.
+- If the tracking plan has source applications, see the dedicated section below — inherited entities don't need to be added per-event-spec.
 - Understand the customer's current tracking setup
 - Search Iglu Central for relevant public schemas for common use cases
 
