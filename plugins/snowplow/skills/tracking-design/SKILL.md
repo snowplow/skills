@@ -1,6 +1,6 @@
 ---
 name: tracking-design
-description: Design and implement event tracking schemas, entities, and event specifications using Snowplow best practices. Use when the user wants to track new events, create schemas, or design their tracking plan.
+description: Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, instrumentation planning, or data modelling, even if they don't explicitly say "tracking plan." Triggers: schema design, tracking plan, event spec, Iglu, entities, data product.
 tools:
   - list_schemas
   - get_schema_properties
