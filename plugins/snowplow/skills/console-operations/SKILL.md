@@ -1,6 +1,6 @@
 ---
 name: console-operations
-description: Manage pipelines, enrichments, tracking plans, data quality alerts, and source applications. Use when users want to view, configure, or manage Console resources.
+description: Create, update, or delete Snowplow Console resources — enrichment configuration, data quality alerts, source applications, and tracking plans. Use when the user wants to mutate Console state. For read-only inspection use the pipeline-infrastructure or tracking-design skills instead. Triggers: create alert, update enrichment, add source app, create tracking plan, enable enrichment.
 tools:
   - list_pipelines
   - get_pipeline
@@ -86,6 +86,30 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - List all tracked data structures (events and entities) with their relationships
 - Search the catalog by name, vendor, or description to find specific data structures
 - See which events link to which entities and vice versa
+
+## Workflow Recipes
+
+### Add a Cookie to the Cookie Extractor Enrichment
+
+1. Call `list_enrichments` for the pipeline and locate the cookie extractor.
+2. Show the user the current `cookies` array from the enrichment content.
+3. Ask which cookie name(s) to add and confirm the final list.
+4. Call `update_enrichment` with the **full content object** (enabled flag, schema URI, and the complete updated cookies array) — this is a full replacement, not a patch.
+5. Offer to navigate to the enrichment in the Console to verify.
+
+### Create a Data Quality Alert for Validation Errors
+
+1. Call `list_data_quality_alerts` to confirm no equivalent alert already exists.
+2. Ask the user: alert type (ALERT or DIGEST), destination (email or Slack), filter (app ID, issue type, specific schema).
+3. Present the proposed alert config and ask for confirmation.
+4. Call `create_data_quality_alert` and report the resulting alert ID.
+
+### Create a Source Application
+
+1. Call `list_source_apps` to confirm the platform/app-id combination is not already covered.
+2. Ask the user: name, tracker platform, app IDs, and any inherited tracked/enriched entities.
+3. Confirm the proposal, then call `create_source_app`.
+4. Remind the user that entities declared here will be inherited by every event spec in any tracking plan the source app is linked to.
 
 ## Important Notes
 
