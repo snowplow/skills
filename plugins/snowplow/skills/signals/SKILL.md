@@ -32,6 +32,7 @@ tools:
   - signals_get_applied_interventions
   - signals_test_attribute_group
   - signals_get_online_attributes
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Signals

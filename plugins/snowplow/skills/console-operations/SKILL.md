@@ -22,6 +22,7 @@ tools:
   - get_event_spec_metrics
   - list_data_catalog
   - search_data_catalog
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Console Operations

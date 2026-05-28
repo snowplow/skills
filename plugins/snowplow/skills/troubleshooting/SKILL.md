@@ -11,6 +11,7 @@ tools:
   - list_enrichments
   - list_schemas
   - get_schema_properties
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Troubleshooting

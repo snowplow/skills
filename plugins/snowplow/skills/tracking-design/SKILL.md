@@ -18,6 +18,7 @@ tools:
   - search_data_catalog
   - list_source_apps
   - get_source_app
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Tracking Design

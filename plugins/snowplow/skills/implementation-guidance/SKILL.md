@@ -12,6 +12,7 @@ tools:
   - list_micros
   - fetch_documentation_index
   - fetch_documentation_page
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Implementation Guidance

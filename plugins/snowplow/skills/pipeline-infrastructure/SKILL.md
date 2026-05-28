@@ -10,6 +10,7 @@ tools:
   - list_micros
   - list_enrichments
   - get_failed_events_metrics
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Pipeline Infrastructure
