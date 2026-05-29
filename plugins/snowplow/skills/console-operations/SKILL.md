@@ -19,6 +19,7 @@ tools:
   - list_tracking_plans
   - get_tracking_plan
   - create_tracking_plan
+  - edit_tracking_plan
   - get_event_spec_metrics
   - list_data_catalog
   - search_data_catalog
@@ -68,6 +69,7 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - List existing tracking plans (formerly called data products)
 - Get a specific tracking plan with all its event specs using get_tracking_plan
 - Create new tracking plans with name and description
+- Edit a tracking plan's metadata (name, description, domain, access instructions) — only the fields you pass are changed
 - For adding event specs to tracking plans, use the tracking-design skill
 
 ### Source Applications
@@ -111,6 +113,13 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 2. Ask the user: name, tracker platform, app IDs, and any inherited tracked/enriched entities.
 3. Confirm the proposal, then call `create_source_app`.
 4. Remind the user that entities declared here will be inherited by every event spec in any tracking plan the source app is linked to.
+
+### Edit a Tracking Plan's Metadata
+
+1. Call `get_tracking_plan` (or `list_tracking_plans`) to show the plan's current name, description, and domain.
+2. Confirm with the user which fields to change.
+3. Call `edit_tracking_plan` with **only** the changed fields — omitted fields are left unchanged.
+4. Offer to navigate to the tracking plan in the Console to verify.
 
 ## Important Notes
 

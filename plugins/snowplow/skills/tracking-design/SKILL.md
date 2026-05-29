@@ -4,6 +4,7 @@ description: Design event tracking schemas, entities, and event specifications f
 tools:
   - list_schemas
   - get_schema_properties
+  - get_data_structure_by_hash
   - create_schema_version
   - create_event_specification
   - update_event_specification
@@ -14,6 +15,7 @@ tools:
   - list_tracking_plans
   - get_tracking_plan
   - create_tracking_plan
+  - edit_tracking_plan
   - list_data_catalog
   - search_data_catalog
   - list_source_apps
@@ -41,6 +43,7 @@ It is important you never create schemas or event specifications without explici
 - If working within a specific tracking plan, use get_tracking_plan to fetch the plan details along with all its event specs. Otherwise, use list_event_specifications (with the optional dataProductId filter to scope to a specific plan if known).
 - If the tracking plan has source applications, fetch them with get_source_app — their entities are inherited by every event spec and don't need to be added per-spec (see Source Application Entity Inheritance below).
 - Understand the customer's current tracking setup
+- If the user references a Console data-structure URL (`/data-structures/<hash>`), resolve it with get_data_structure_by_hash to identify which schema they mean.
 - Search Iglu Central for relevant public schemas for common use cases
 
 ### Phase 2: Intent Gathering
