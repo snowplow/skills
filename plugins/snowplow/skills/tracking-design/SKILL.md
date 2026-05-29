@@ -1,6 +1,6 @@
 ---
 name: tracking-design
-description: Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, instrumentation planning, or data modelling, even if they don't explicitly say "tracking plan." Triggers: schema design, tracking plan, event spec, Iglu, entities, data product.
+description: Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say "tracking plan." Triggers: schema design, tracking plan, event spec, Iglu, entities, data product.
 tools:
   - list_schemas
   - get_schema_properties
@@ -39,7 +39,7 @@ It is important you never create schemas or event specifications without explici
 
 - List existing schemas and tracking plans using the list_schemas and list_tracking_plans tools to understand the current state of the customer's tracking setup.
 - If working within a specific tracking plan, use get_tracking_plan to fetch the plan details along with all its event specs. Otherwise, use list_event_specifications (with the optional dataProductId filter to scope to a specific plan if known).
-- If the tracking plan has source applications, see the dedicated section below — inherited entities don't need to be added per-event-spec.
+- If the tracking plan has source applications, fetch them with get_source_app — their entities are inherited by every event spec and don't need to be added per-spec (see Source Application Entity Inheritance below).
 - Understand the customer's current tracking setup
 - Search Iglu Central for relevant public schemas for common use cases
 
