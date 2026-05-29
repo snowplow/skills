@@ -1,6 +1,6 @@
 ---
 name: implementation-guidance
-description: Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code.
+description: Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker.
 tools:
   - list_schemas
   - get_schema_properties
@@ -10,6 +10,9 @@ tools:
   - list_source_apps
   - list_pipelines
   - list_micros
+  - fetch_documentation_index
+  - fetch_documentation_page
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Implementation Guidance
@@ -46,7 +49,7 @@ Snowplow tracking implementation follows this lifecycle. Walk the user through e
 Before testing with Micro, schemas must be in the **DEV** environment — Micro uses DEV schemas to validate events.
 
 1. Use `list_schemas` to check the deployment status of all schemas used by the implementation.
-2. Confirm `[DEV]` appears next to each schema. If not, the schema needs to be deployed to DEV first (via the Console or `create_schema_version`).
+2. Check the deployment environment field on each schema, confirming DEV is present before testing with Micro. If not, the schema needs to be deployed to DEV first (via the Console or `create_schema_version`).
 3. Only proceed to Stage 3 once all schemas are confirmed in DEV.
 
 ### Stage 3: Test with Micro
@@ -71,7 +74,7 @@ Once events pass validation in Micro:
 
 Before going live:
 
-1. Ensure all schemas used by the implementation are deployed to **PROD** — check with `list_schemas` and confirm `[PROD]` appears next to each schema.
+1. Ensure all schemas used by the implementation are deployed to **PROD** — check with `list_schemas` and confirm PROD is present in the deployment environment field on each schema before pointing the tracker at the production collector.
 2. Ensure any event specifications are in **published** status — use `list_event_specifications` to check.
 3. Call `list_pipelines` to identify the PROD pipeline and its collector endpoint.
 4. Update the tracker initialisation to the PROD collector endpoint.
