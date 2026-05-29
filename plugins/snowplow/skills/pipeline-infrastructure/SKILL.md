@@ -24,7 +24,7 @@ You are helping a user understand their Snowplow pipeline infrastructure. Give c
 When a user asks about their pipeline setup, start with the big picture:
 
 1. Call list_pipelines to show all pipelines with status, labels, and collector endpoints
-2. Call list_micros and list_minis if relevant (Micro instances are the modern local-development option)
+2. Call list_micros and list_minis if relevant (Micros run locally or as Snowplow-hosted instances)
 3. Present a clear summary of the infrastructure
 
 ### Phase 2: Pipeline Health & Metrics
@@ -114,7 +114,7 @@ After showing the infrastructure state, proactively suggest improvements:
 - Pipeline statuses: creating → ready → updating → deleting. Only "ready" means fully operational
 - Pipeline labels (dev/prod/staging) are organizational — they don't change pipeline behavior
 - Mini pipelines are enrichment-only — they don't have collectors or loaders
-- Minis are the older form; Micros are the current option for local development and testing
+- Minis are the older form; Micros are the current equivalent, available self-hosted for local development or as Snowplow-hosted instances
 - Collector config changes are async (202 Accepted) — they take effect after a brief delay
 - The metrics v2 endpoint supports a `from` parameter (e.g. P-7D, P-1D, P-1M) for the time range
 - Loaders with failedEventsLoader=true load failed/bad events to a separate destination for recovery

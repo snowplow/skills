@@ -44,7 +44,7 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - View collector configuration details (CNAME, cookie policy, custom paths)
 - View real-time pipeline metrics (collector RPS, enrichment latency, loader throughput, bad rows)
 - List mini pipelines and their endpoints
-- List Micro instances (name, endpoint, app version) — Micros are the current option for local development and testing
+- List Micro instances (name, endpoint, app version) — Micros run locally for development and testing, or as Snowplow-hosted instances
 - Pipelines cannot be created or deleted via API — direct users to Console UI for that
 
 ### Enrichment Management
