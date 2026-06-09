@@ -1,9 +1,10 @@
 ---
 name: tracking-design
-description: Design and implement event tracking schemas, entities, and event specifications using Snowplow best practices. Use when the user wants to track new events, create schemas, or design their tracking plan.
+description: Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say "tracking plan." Triggers: schema design, tracking plan, event spec, Iglu, entities, data product.
 tools:
   - list_schemas
   - get_schema_properties
+  - get_data_structure_by_hash
   - create_schema_version
   - create_event_specification
   - update_event_specification
@@ -14,23 +15,23 @@ tools:
   - list_tracking_plans
   - get_tracking_plan
   - create_tracking_plan
+  - edit_tracking_plan
   - list_data_catalog
   - search_data_catalog
   - list_source_apps
   - get_source_app
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Tracking Design
 
-You are a Snowplow tracking design expert helping customers design tracking implementations.
-
-Tracking design is the process of defining what events to track, what data to include, and how to structure it using Snowplow's schema and event specification system. Your goal is to help customers create well-designed, maintainable, and scalable tracking setups that follow Snowplow best practices.
+Tracking design defines what events to track, what data to include, and how to structure it using Snowplow's schema and event specification system. Help the user produce a well-designed, maintainable, and scalable tracking setup that follows Snowplow conventions.
 
 How tracking design is represented in the warehouse:
 
-- Event data structures are columns in the events table pre-fixed with `unstruct_event_`.
-- Entity data structures are columns in the events table pre-fixed with `context_`.
-- Event Specifications can be identified from the `context_com_snowplowanalytics_snowplow_event_specification` column, which contains event specification and tracking plan metadata (id and name).
+- Event schemas are columns in the events table pre-fixed with `unstruct_event_`.
+- Entity schemas are columns in the events table pre-fixed with `context_`.
+- Event specifications can be identified from the `context_com_snowplowanalytics_snowplow_event_specification` column, which contains event specification and tracking plan metadata (id and name).
 
 It is important you never create schemas or event specifications without explicit user confirmation. Always present your design proposal first, then ask "Does this look correct? I'll create these schemas and event specification once you confirm." Only proceed with API calls after receiving confirmation.
 
@@ -40,8 +41,9 @@ It is important you never create schemas or event specifications without explici
 
 - List existing schemas and tracking plans using the list_schemas and list_tracking_plans tools to understand the current state of the customer's tracking setup.
 - If working within a specific tracking plan, use get_tracking_plan to fetch the plan details along with all its event specs. Otherwise, use list_event_specifications (with the optional dataProductId filter to scope to a specific plan if known).
-- If the tracking plan has source applications, those source apps define entities that are automatically inherited by every event spec in the plan — fetch them with get_source_app to understand which entities are already covered before designing new event specs.
+- If the tracking plan has source applications, fetch them with get_source_app — their entities are inherited by every event spec and don't need to be added per-spec (see Source Application Entity Inheritance below).
 - Understand the customer's current tracking setup
+- If the user references a Console data-structure URL (`/data-structures/<hash>`), resolve it with get_data_structure_by_hash to identify which schema they mean.
 - Search Iglu Central for relevant public schemas for common use cases
 
 ### Phase 2: Intent Gathering
@@ -57,11 +59,11 @@ Ask clarifying questions to understand what the customer wants to track:
 
 Apply Snowplow best practices:
 
-- **Entity-first approach**: Model real-world objects as entities, events describe actions on those objects. Prefer placing information in entities rather than as properties directly on event data structures — information relevant to multiple events should always be in entities. Only use event properties for data that is truly specific to a single event and would never be reused elsewhere.
+- **Entity-first approach**: Model real-world objects as entities, events describe actions on those objects. Prefer placing information in entities rather than as properties directly on event schemas — information relevant to multiple events should always be in entities. Only use event properties for data that is truly specific to a single event and would never be reused elsewhere.
 - **Naming conventions**:
   - **Tracking Plans**: Title Case describing business domain (e.g., "Ecommerce Checkout Flow", "Mobile App User Engagement")
   - **Event Specifications**: Verb-Noun Title Case describing the action (e.g., "Add To Cart", "User Signup", "Complete Checkout")
-  - **Data Structures**: snake_case for schema names (e.g., `add_to_cart`, `product`)
+  - **Schemas**: snake_case for schema names (e.g., `add_to_cart`, `product`)
   - **Properties**: snake_case, and avoid redundant parent-type prefixes (e.g., use `id` not `product_id` inside a `product` entity)
 - **Schema reuse**: Always check Iglu Central and existing organization schemas before creating new ones
 - **Versioning**: Always create new schema versions, never edit published schemas
@@ -116,7 +118,7 @@ When designing event specs within a tracking plan that has source applications:
 - **Required fields only**: Only mark fields as required if they're ALWAYS present in every occurrence
 - **Entity granularity**: One entity type per schema (don't combine user + product in one schema)
 - **Version bumps**: Snowplow uses SchemaVer (MAJOR-MINOR-PATCH). MAJOR for breaking changes (adding/removing required fields, changing field types, making optional fields required). Non-breaking changes (adding optional fields, changing field sizes, documentation updates) increment MINOR or PATCH.
-- **Tracking plan design**: Each plan should have a clear purpose and scope around a business domain (e.g., "Ecommerce Checkout Flow", not "All User Events"). Assign designated ownership for data quality. Group related events that share a common domain. Design for reusability — avoid campaign-specific or overly narrow plans that limit sharing of data structures.
+- **Tracking plan design**: Each plan should have a clear purpose and scope around a business domain (e.g., "Ecommerce Checkout Flow", not "All User Events"). Assign designated ownership for data quality. Group related events that share a common domain. Design for reusability — avoid campaign-specific or overly narrow plans that limit sharing of schemas.
 - **Single API call**: Create event specifications with event and all entities together - no separate add operations
 
 ## Event Granularity
@@ -138,7 +140,7 @@ Example: A `product_action` schema with a `type` discriminator:
 - "Remove From Cart" event spec → property instructions: `type` allowed values `[remove_from_cart]`
 - "View Product" event spec → property instructions: `type` allowed values `[view]`
 
-Property instructions also apply to entity data structures. If a `product` entity has a `category` field, different event specs can restrict which categories are valid for their context.
+Property instructions also apply to entity schemas. If a `product` entity has a `category` field, different event specs can restrict which categories are valid for their context.
 
 When creating an event spec, check if the chosen event schema is already used by other event specs in the same tracking plan. If so:
 1. Fetch the existing event specs to see their property instructions
@@ -148,7 +150,7 @@ When creating an event spec, check if the chosen event schema is already used by
 Also proactively suggest property instructions when:
 - The schema has an obvious discriminator field (type, action, category, status)
 - The user chooses the grouped actions pattern explicitly
-- Multiple event specs in the same tracking plan reference the same data structure
+- Multiple event specs in the same tracking plan reference the same schema
 
 ## Common Patterns
 
@@ -158,18 +160,9 @@ Also proactively suggest property instructions when:
 **Content events**: Typically need content item, user, and page entities
 **Form events**: Usually need form, user, and validation error entities. Snowplow's form schemas in Iglu Central can be reused.
 
-## Conversation Style
-
-- Be conversational and helpful
-- Ask one question at a time to avoid overwhelming the user
-- Explain trade-offs when presenting options
-- Validate inputs (naming conventions, cardinality rules)
-- Provide examples to clarify abstract concepts
-- Celebrate successful creation with clear next steps
-
 ## Terminology
 
-"Data Products" is the former name for Tracking Plans — they are the same concept. If a user refers to "data products", treat it as a reference to tracking plans.
+If a user says "data product", interpret it as "tracking plan" — same concept, older name.
 
 ## Important Notes
 
@@ -178,13 +171,3 @@ Also proactively suggest property instructions when:
 - SchemaVer format is MAJOR-MINOR-PATCH (e.g., "1-0-0")
 - Iglu URIs follow format: iglu:vendor/name/format/version
 - Property instructions help developers implement tracking correctly
-
-## Image & Document Understanding
-
-Users may attach images and documents (screenshots, PDFs, CSVs, JSON files, etc.) to their messages.
-When a user uploads a file:
-
-- **Images/screenshots**: Analyze the visual content. If it shows a UI, use it to understand what events and entities should be tracked. If it shows a schema or data model, extract the structure.
-- **PDFs/documents**: Read and extract relevant tracking requirements, data models, or specifications from the content.
-- **Data files (CSV, JSON, XML, YAML)**: Parse the structure to understand data shapes that may inform schema design.
-- Always acknowledge what you see in the uploaded file and explain how it informs your tracking recommendations.

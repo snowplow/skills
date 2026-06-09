@@ -1,6 +1,6 @@
 ---
 name: console-operations
-description: Manage pipelines, enrichments, tracking plans, data quality alerts, and source applications. Use when users want to view, configure, or manage Console resources.
+description: Create, update, or delete Snowplow Console resources — enrichment configuration, data quality alerts, source applications, and tracking plans. Use when the user wants to mutate Console state. For read-only inspection use the pipeline-infrastructure or tracking-design skills instead. Triggers: create alert, update enrichment, add source app, create tracking plan, enable enrichment.
 tools:
   - list_pipelines
   - get_pipeline
@@ -19,9 +19,11 @@ tools:
   - list_tracking_plans
   - get_tracking_plan
   - create_tracking_plan
+  - edit_tracking_plan
   - get_event_spec_metrics
   - list_data_catalog
   - search_data_catalog
+compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
 # Console Operations
@@ -43,7 +45,7 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - View collector configuration details (CNAME, cookie policy, custom paths)
 - View real-time pipeline metrics (collector RPS, enrichment latency, loader throughput, bad rows)
 - List mini pipelines and their endpoints
-- List Micro instances (name, endpoint, app version) — Micros are the successor to Minis for local development and testing
+- List Micro instances (name, endpoint, app version) — Micros run locally for development and testing, or as Snowplow-hosted instances
 - Pipelines cannot be created or deleted via API — direct users to Console UI for that
 
 ### Enrichment Management
@@ -58,15 +60,16 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - List existing alerts
 - Create new alerts for email or Slack notifications
 - Alert types: ALERT (immediate) or DIGEST (periodic summary)
-- Filters: by app ID, issue type (ValidationError, ResolutionError), or specific data structures
+- Filters: by app ID, issue type (ValidationError, ResolutionError), or specific schemas
 - For Slack alerts, user must have Slack integration set up first
 - Update or delete existing alerts
 
-### Data Products / Tracking Plans
+### Tracking Plans
 
 - List existing tracking plans (formerly called data products)
 - Get a specific tracking plan with all its event specs using get_tracking_plan
 - Create new tracking plans with name and description
+- Edit a tracking plan's metadata (name, description, domain, access instructions) — only the fields you pass are changed
 - For adding event specs to tracking plans, use the tracking-design skill
 
 ### Source Applications
@@ -79,13 +82,44 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 
 - Retrieve event volume metrics for event specifications
 - Shows total event counts, breakdown by app ID, and last seen timestamps
-- Filter by tracking plan, source data structure, schema version, or event spec status (draft/published)
+- Filter by tracking plan, source schema, schema version, or event spec status (draft/published)
 
 ### Data Catalog
 
-- List all tracked data structures (events and entities) with their relationships
-- Search the catalog by name, vendor, or description to find specific data structures
+- List all tracked schemas (events and entities) with their relationships
+- Search the catalog by name, vendor, or description to find specific schemas
 - See which events link to which entities and vice versa
+
+## Workflow Recipes
+
+### Add a Cookie to the Cookie Extractor Enrichment
+
+1. Call `list_enrichments` for the pipeline and locate the cookie extractor.
+2. Show the user the current `cookies` array from the enrichment content.
+3. Ask which cookie name(s) to add and confirm the final list.
+4. Call `update_enrichment` with the **full content object** (enabled flag, schema URI, and the complete updated cookies array) — this is a full replacement, not a patch.
+5. Offer to navigate to the enrichment in the Console to verify.
+
+### Create a Data Quality Alert for Validation Errors
+
+1. Call `list_data_quality_alerts` to confirm no equivalent alert already exists.
+2. Ask the user: alert type (ALERT or DIGEST), destination (email or Slack), filter (app ID, issue type, specific schema).
+3. Present the proposed alert config and ask for confirmation.
+4. Call `create_data_quality_alert` and report the resulting alert ID.
+
+### Create a Source Application
+
+1. Call `list_source_apps` to confirm the platform/app-id combination is not already covered.
+2. Ask the user: name, tracker platform, app IDs, and any inherited tracked/enriched entities.
+3. Confirm the proposal, then call `create_source_app`.
+4. Remind the user that entities declared here will be inherited by every event spec in any tracking plan the source app is linked to.
+
+### Edit a Tracking Plan's Metadata
+
+1. Call `get_tracking_plan` (or `list_tracking_plans`) to show the plan's current name, description, and domain.
+2. Confirm with the user which fields to change.
+3. Call `edit_tracking_plan` with **only** the changed fields — omitted fields are left unchanged.
+4. Offer to navigate to the tracking plan in the Console to verify.
 
 ## Important Notes
 
