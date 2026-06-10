@@ -4,6 +4,17 @@ A vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of
 
 ## Install
 
+### Claude Code (native marketplace)
+
+```text
+/plugin marketplace add snowplow/skills
+/plugin install snowplow@snowplow
+```
+
+Claude Code reads the committed `.claude-plugin/` files directly from the repo.
+
+### Any agent (vendor-neutral open-plugin)
+
 ```bash
 npx plugins add snowplow/skills
 ```
@@ -32,17 +43,26 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
 
 ```
 .
+├── .claude-plugin/
+│   └── marketplace.json          # Claude Code native catalog
 ├── .plugin/
-│   └── marketplace.json          # marketplace catalog (this repo)
+│   └── marketplace.json          # open-plugin catalog
 └── plugins/
     └── snowplow/
+        ├── .claude-plugin/
+        │   └── plugin.json       # Claude Code native manifest
         ├── .plugin/
-        │   └── plugin.json       # plugin manifest
-        ├── .mcp.json             # Snowplow MCP server
-        └── skills/               # six bundled SKILL.md files
+        │   └── plugin.json       # open-plugin manifest
+        ├── .mcp.json             # Snowplow MCP server (shared)
+        └── skills/               # six bundled SKILL.md files (shared)
 ```
 
-The `.plugin/` directories use the vendor-neutral [open-plugin format](https://github.com/vercel-labs/plugins). The `plugins` CLI translates them into target-specific formats (`.claude-plugin/`, `.cursor-plugin/`, `.codex-plugin/`) at install time.
+Two manifest formats coexist so the repo works as both a native Claude Code marketplace and a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle:
+
+- **`.claude-plugin/`** — read directly by Claude Code's `/plugin marketplace add`. Keep these in sync by hand when metadata changes.
+- **`.plugin/`** — the vendor-neutral [open-plugin format](https://github.com/vercel-labs/plugins). The `plugins` CLI translates them into target-specific formats (`.claude-plugin/`, `.cursor-plugin/`, `.codex-plugin/`) at install time for Claude Code, Cursor, or Codex.
+
+The `.mcp.json` and `skills/` are shared by both — no duplication there.
 
 ## Local development
 
