@@ -1,6 +1,6 @@
 ---
 name: console-operations
-description: Create, update, or delete Snowplow Console resources — enrichment configuration, data quality alerts, source applications, and tracking plans. Use when the user wants to mutate Console state. For read-only inspection use the pipeline-infrastructure or tracking-design skills instead. Triggers: create alert, update enrichment, add source app, create tracking plan, enable enrichment.
+description: "Create, update, or delete Snowplow Console resources — enrichment configuration, data quality alerts, source applications, and tracking plans. Use when the user wants to mutate Console state. For read-only inspection use the pipeline-infrastructure or tracking-design skills instead. Triggers: create alert, update enrichment, add source app, create tracking plan, enable enrichment."
 tools:
   - list_pipelines
   - get_pipeline
