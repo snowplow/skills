@@ -1,16 +1,6 @@
 ---
 name: troubleshooting
 description: "Diagnose pipeline issues, failed events, schema validation errors, and enrichment problems. Use when users report missing events, validation failures, or pipeline errors. Use this skill whenever events appear to be missing, dropping, or failing, even if the user just says \"something is wrong with my pipeline.\" Triggers: failed events, bad rows, validation error, missing events, enrichment failure, debug."
-tools:
-  - list_pipelines
-  - get_pipeline
-  - get_pipeline_metrics
-  - get_collector_config
-  - get_failed_events_metrics
-  - get_failed_event_detail
-  - list_enrichments
-  - list_schemas
-  - get_schema_properties
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -117,3 +107,15 @@ Once you've identified the root cause:
 - The schemaKey in failed events uses the Iglu URI format — use it directly with get_schema_properties
 - Always check both Validation and Enrichment classifications — sometimes both are failing
 - If there are many different error types, focus on the one with the highest count first
+
+## Tools
+
+- `list_pipelines` — identify the affected pipeline
+- `get_pipeline` — check pipeline status (should be "ready")
+- `get_pipeline_metrics` — collector errors, enrichment latency, loader status, dropped events
+- `get_collector_config` — inspect collector setup (CNAME, encryption, custom paths, cookies)
+- `get_failed_events_metrics` — whether events are failing and how many (defaults to last week; narrow with `from`, e.g. `PT-24H`)
+- `get_failed_event_detail` — specific error details for a failed event
+- `list_enrichments` — the pipeline's enrichment configuration
+- `list_schemas` — check whether expected schemas exist / are deployed
+- `get_schema_properties` — inspect a schema definition (use the failing schemaKey directly)
