@@ -1,17 +1,6 @@
 ---
 name: implementation-guidance
 description: "Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker."
-tools:
-  - list_schemas
-  - get_schema_properties
-  - get_event_specification
-  - list_event_specifications
-  - search_iglu_central
-  - list_source_apps
-  - list_pipelines
-  - list_micros
-  - fetch_documentation_index
-  - fetch_documentation_page
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -110,3 +99,16 @@ Always fetch the docs rather than generating tracker code from memory.
 - If a field has property instructions in the event spec, include them as code comments
 - When showing entity contexts, note the cardinality (e.g. `// Required — must be attached` vs `// Optional`)
 - If the user's schema doesn't exist yet, suggest they create it first (point them to the tracking-design skill)
+
+## Tools
+
+- `list_event_specifications` — find the event specs to implement
+- `get_event_specification` — full spec with entities and cardinality
+- `get_schema_properties` — exact field names, types, and requirements
+- `search_iglu_central` — find reusable public schemas
+- `list_schemas` — check schema deployment status (`[DEV]` / `[PROD]`)
+- `list_source_apps` — check for a source app matching the platform
+- `list_pipelines` — find DEV/PROD collector endpoints
+- `list_micros` — show available Micro instances and endpoints for testing
+- `fetch_documentation_index` — get the Snowplow documentation sitemap
+- `fetch_documentation_page` — fetch up-to-date tracker reference pages

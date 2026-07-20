@@ -1,28 +1,6 @@
 ---
 name: console-operations
 description: "Create, update, or delete Snowplow Console resources — enrichment configuration, data quality alerts, source applications, and tracking plans. Use when the user wants to mutate Console state. For read-only inspection use the pipeline-infrastructure or tracking-design skills instead. Triggers: create alert, update enrichment, add source app, create tracking plan, enable enrichment."
-tools:
-  - list_pipelines
-  - get_pipeline
-  - get_pipeline_metrics
-  - get_collector_config
-  - list_minis
-  - list_micros
-  - list_enrichments
-  - update_enrichment
-  - list_data_quality_alerts
-  - create_data_quality_alert
-  - update_data_quality_alert
-  - delete_data_quality_alert
-  - list_source_apps
-  - create_source_app
-  - list_tracking_plans
-  - get_tracking_plan
-  - create_tracking_plan
-  - edit_tracking_plan
-  - get_event_spec_metrics
-  - list_data_catalog
-  - search_data_catalog
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -127,3 +105,27 @@ You are helping a user manage their Snowplow BDP Console resources. Follow these
 - Enrichment updates trigger a pipeline reconfiguration — warn users this may briefly affect event processing
 - Deleting a data quality alert cannot be undone
 - Source app lock status: "locked" source apps cannot be modified
+
+## Tools
+
+- `list_pipelines` — all pipelines with status, labels, and collector endpoints
+- `get_pipeline` — one pipeline's configuration (collector settings, enrichment flags)
+- `get_pipeline_metrics` — real-time metrics (collector RPS, enrichment latency, loader throughput, bad rows)
+- `get_collector_config` — collector details (CNAME, cookie policy, custom paths)
+- `list_minis` — mini pipelines and their endpoints
+- `list_micros` — Micro instances (name, endpoint, app version)
+- `list_enrichments` — enrichments configured on a pipeline
+- `update_enrichment` — enable/disable or reconfigure an enrichment (send the full content object — it's a replacement, not a patch)
+- `list_data_quality_alerts` — existing data quality alerts
+- `create_data_quality_alert` — create an email or Slack alert
+- `update_data_quality_alert` — modify an existing alert
+- `delete_data_quality_alert` — remove an alert (cannot be undone)
+- `list_source_apps` — source applications and their configuration
+- `create_source_app` — create a source app (tracker platform, app IDs, entities)
+- `list_tracking_plans` — tracking plans (formerly data products)
+- `get_tracking_plan` — one tracking plan with all its event specs
+- `create_tracking_plan` — create a tracking plan (name, description)
+- `edit_tracking_plan` — edit a tracking plan's metadata (name, description, domain, access instructions) — only the fields you pass are changed
+- `get_event_spec_metrics` — event volume metrics for event specifications
+- `list_data_catalog` — all tracked schemas and their relationships
+- `search_data_catalog` — search the catalog by name, vendor, or description
