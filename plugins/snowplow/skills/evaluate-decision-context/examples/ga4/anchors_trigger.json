@@ -1,0 +1,30 @@
+{
+  "mode": "trigger",
+  "triggers": [
+    {
+      "type": "criteria",
+      "criteria": {
+        "all": [
+          {
+            "attribute": "session_shopping:page_views",
+            "operator": ">=",
+            "value": 3
+          },
+          {
+            "none": [
+              {
+                "attribute": "session_shopping:checkout_steps",
+                "operator": ">=",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "evaluation_policy": {
+    "cooldown_seconds": 600,
+    "max_per_session": 2
+  }
+}

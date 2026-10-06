@@ -1,0 +1,22 @@
+{
+  "mode": "event",
+  "criteria": {
+    "all": [
+      {
+        "property": {
+          "type": "event",
+          "vendor": "com.snowplowanalytics.snowplow.ecommerce",
+          "name": "snowplow_ecommerce_action",
+          "major_version": 1,
+          "path": "type"
+        },
+        "operator": "=",
+        "value": "product_view"
+      }
+    ]
+  },
+  "max_per_session": 2,
+  "pick": "random",
+  "seed": "eval",
+  "include_anchor_event": false
+}

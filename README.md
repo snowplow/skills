@@ -38,6 +38,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
 - `pipeline-infrastructure` — collector, enrichment, pipeline metrics, mini pipelines
 - `console-operations` — pipelines, enrichments, tracking plans, alerts, source apps
 - `troubleshooting` — diagnose failed events, schema errors, enrichment problems
+- `evaluate-decision-context` — evaluate a decision model (such as Jev) on past traffic with Signals datasets before it goes live
 
 ## Layout
 
@@ -54,7 +55,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
         ├── .plugin/
         │   └── plugin.json       # open-plugin manifest
         ├── .mcp.json             # Snowplow MCP server (shared)
-        └── skills/               # six bundled SKILL.md files (shared)
+        └── skills/               # bundled skills (shared)
 ```
 
 Two manifest formats coexist so the repo works as both a native Claude Code marketplace and a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle:
