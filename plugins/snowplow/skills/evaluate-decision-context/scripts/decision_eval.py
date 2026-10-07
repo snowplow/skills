@@ -20,7 +20,12 @@ Each step is a subcommand that reads and writes files in a working directory:
   render               dataset rows -> the states the model receives (built in, or your own builder)
   ask                  states -> answers to the call's questions (Jev, or any command), cached
   check                answers -> label-free checks, outcome checks, variant comparisons
+  history              every run so far, version by version, from the runs ledger
   judge                sample answers for an LLM judge to label, then score agreement
+
+dataset, render, ask and check append what they did to runs.jsonl (--ledger), with hashes of the
+call and the state builder and a copy of each under versions/, so any answers file can be traced
+back to what produced it.
 
 call.json is the call being evaluated: {"model": "jev", "questions": {...}} with the questions
 exactly as the application sends them.
@@ -50,6 +55,47 @@ from pathlib import Path
 import httpx
 import numpy as np
 import pandas as pd
+
+# ---------------------------------------------------------------------------
+# Runs ledger
+
+
+def _sha(data: str | bytes) -> str:
+    return hashlib.sha256(data.encode() if isinstance(data, str) else data).hexdigest()[:12]
+
+
+def _keep_version(ledger: Path, path: Path) -> str:
+    """Hash a call or state builder file and keep a copy under versions/, so an edit made in
+    place later does not lose the version earlier answers came from."""
+    data = path.read_bytes()
+    digest = _sha(data)
+    copy = ledger.parent / "versions" / f"{path.stem}.{digest}{path.suffix}"
+    if not copy.exists():
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        copy.write_bytes(data)
+    return digest
+
+
+def _record(args, step: str, **entry):
+    ledger = Path(args.ledger)
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    with ledger.open("a") as f:
+        f.write(json.dumps({"at": datetime.now().isoformat(timespec="seconds"), "step": step, **entry}, default=str) + "\n")
+
+
+def _read_ledger(path) -> list[dict]:
+    path = Path(path)
+    return [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+
+
+def _latest(entries: list[dict], step: str, key: str) -> dict[str, dict]:
+    """The latest entry of a step for each value of `key`, such as the last ask that wrote a file."""
+    found = {}
+    for e in entries:
+        if e["step"] == step:
+            found[e[key]] = e
+    return found
+
 
 # ---------------------------------------------------------------------------
 # Signals API
@@ -243,6 +289,9 @@ def cmd_dataset(args):
         "seconds": round(time.time() - started, 1),
     }
     (out / "run.json").write_text(json.dumps(meta, indent=2) + "\n")
+    _record(args, "dataset", dataset=str(out), run_id=run["id"], anchors_table=anchors_table,
+            dataset_table=run["dataset"], rows=len(rows), truncated=meta["truncated"],
+            request_sha=_sha(json.dumps(request, sort_keys=True)))
     print(f"{len(rows)} rows in {meta['seconds']}s -> {out / 'rows.jsonl'}"
           + (" (truncated: raise --limit or sample fewer sessions)" if meta["truncated"] else ""))
 
@@ -340,6 +389,15 @@ def cmd_render(args):
         for row_id in rows.row_id:
             sizes.append(len(json.dumps(states[row_id])))
             f.write(json.dumps({"row_id": row_id, "variant": args.variant, "state": states[row_id]}) + "\n")
+    if args.command:
+        # The builder's own files (the script, not the interpreter) are the version that matters.
+        files = [Path(t) for t in shlex.split(args.command) if Path(t).is_file()]
+        builder = {"command": args.command, "files": {str(f): _keep_version(Path(args.ledger), f) for f in files}}
+    else:
+        builder = {"builtin": args.style, "attributes": args.attributes, "event_logs": args.event_logs,
+                   "no_event_logs": args.no_event_logs, "collapse_repeats": args.collapse_repeats}
+    _record(args, "render", states=str(out), states_sha=_sha(out.read_bytes()), dataset=str(args.dataset),
+            run_id=meta["run_id"], variant=args.variant, builder=builder, median_chars=int(np.median(sizes)))
     print(f"{len(sizes)} states -> {out}; median {int(np.median(sizes))} characters, max {max(sizes)}")
 
 
@@ -399,8 +457,7 @@ async def _ask_jev(items, questions, route, cache, concurrency):
             for name, q in questions.items()}
     semaphore = asyncio.Semaphore(concurrency)
 
-    async def one(http, item):
-        key = cache.key("jev", route, config["model"], item["state"], questions)
+    async def one(http, key, item):
         if key in cache.entries:
             return cache.entries[key]
         body = {"state": item["state"], "model": config["model"], "questions": wire}
@@ -423,15 +480,20 @@ async def _ask_jev(items, questions, route, cache, concurrency):
                 return result
         raise RuntimeError("Jev kept failing")
 
+    # Identical states are asked once. Jev can answer the same input differently, and the cache
+    # keeps one answer per state, so asking twice would make a cached rerun disagree with this one.
+    keys = [cache.key("jev", route, config["model"], item["state"], questions) for item in items]
+    unique = dict(zip(keys, items))
     async with httpx.AsyncClient(headers={"Authorization": f"Bearer {api_key}"}, timeout=90) as http:
-        return await asyncio.gather(*(one(http, item) for item in items))
+        answers = dict(zip(unique, await asyncio.gather(*(one(http, k, i) for k, i in unique.items()))))
+    return [answers[k] for k in keys]
 
 
 def _ask_command(items, questions, command, cache):
     """Your model: JSONL {id, state, questions} on stdin; JSONL {id, answers: {question: {answer,
     confidence?, probabilities?, probability_true?}}, input_tokens?, cost_usd?} on stdout."""
     keys = [cache.key("command", command, item["state"], questions) for item in items]
-    todo = [(k, item) for k, item in zip(keys, items) if k not in cache.entries]
+    todo = list({k: item for k, item in zip(keys, items) if k not in cache.entries}.items())
     if todo:
         payload = "".join(json.dumps({"id": k, "state": item["state"], "questions": questions}) + "\n"
                           for k, item in todo)
@@ -448,20 +510,35 @@ def cmd_ask(args):
     call = load_call(args.call)
     items = [json.loads(line) for line in Path(args.states).read_text().splitlines()]
     cache = AnswerCache(Path(args.cache))
+    cached_before = set(cache.entries)
     model = args.model or call.get("model", "jev")
     if model.startswith("jev"):
         route = model.split(":", 1)[1] if ":" in model else (
             "gateway" if os.environ.get("AI_GATEWAY_API_KEY") else "typesafe")
+        resolved = f"jev:{route}"
+        keys = [cache.key("jev", route, JEV_ROUTES[route]["model"], i["state"], call["questions"]) for i in items]
+        new_calls = len({k for k in keys if k not in cache.entries})
         responses = asyncio.run(_ask_jev(items, call["questions"], route, cache, args.concurrency))
     elif model.startswith("command:"):
+        resolved = model
+        keys = [cache.key("command", model.split(":", 1)[1], i["state"], call["questions"]) for i in items]
+        new_calls = len({k for k in keys if k not in cache.entries})
         responses = _ask_command(items, call["questions"], model.split(":", 1)[1], cache)
     else:
         sys.exit("The model must be jev, jev:gateway, jev:typesafe or command:<your command>")
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with Path(args.out).open("w") as f:
         for item, response in zip(items, responses):
             f.write(json.dumps({"row_id": item["row_id"], "variant": item["variant"], **response}) + "\n")
     cost = sum(r.get("cost_usd") or 0 for r in responses)
-    print(f"{len(responses)} calls -> {args.out}" + (f"; cost ${cost:.4f}" if cost else ""))
+    spent = sum((r.get("cost_usd") or 0) for k, r in dict(zip(keys, responses)).items() if k not in cached_before)
+    states_path = Path(args.states)
+    _record(args, "ask", name=args.name or Path(args.out).stem, note=args.note, answers=str(args.out),
+            states=str(states_path), states_sha=_sha(states_path.read_bytes()),
+            variants=sorted({i["variant"] for i in items}), model=resolved, call=str(args.call),
+            call_sha=_keep_version(Path(args.ledger), Path(args.call)), questions=call["questions"],
+            calls=len(responses), new_calls=new_calls, cost_usd=round(cost, 4), spent_usd=round(spent, 4))
+    print(f"{len(responses)} calls ({new_calls} new) -> {args.out}" + (f"; cost ${cost:.4f}" if cost else ""))
 
 
 # ---------------------------------------------------------------------------
@@ -514,7 +591,7 @@ def _paired_auc_delta(a, b, outcome, n, seed):
     return _auc(y, pb) - _auc(y, pa), float(np.percentile(deltas, 2.5)), float(np.percentile(deltas, 97.5))
 
 
-def _check_question(name, qtype, frame, roles, outcomes, args) -> list[str]:
+def _check_question(name, qtype, frame, roles, outcomes, args) -> tuple[list[str], dict]:
     lines = [f"## {name} ({qtype})", ""]
     summary, by_answer = [], []
     for variant, g in frame.groupby("variant", sort=False):
@@ -543,6 +620,13 @@ def _check_question(name, qtype, frame, roles, outcomes, args) -> list[str]:
             for col in numeric[: args.fingerprint_columns]:
                 row[f"mean_{col}"] = round(float(a[col].fillna(0).mean()), 2)
             by_answer.append(row)
+    # The same numbers, structured, for the runs ledger and `history`.
+    structured = {
+        s["variant"]: {**{k: v for k, v in s.items() if k != "variant"},
+                       "by_answer": {str(r["answer"]): {k: v for k, v in r.items() if k not in ("variant", "answer")}
+                                     for r in by_answer if r["variant"] == s["variant"]}}
+        for s in summary
+    }
     lines += [_table(pd.DataFrame(summary)), "", "By answer: share, the model's confidence, what those moments led to "
               "against the average (lift), and what their attributes looked like.", "",
               _table(pd.DataFrame(by_answer)), ""]
@@ -564,14 +648,21 @@ def _check_question(name, qtype, frame, roles, outcomes, args) -> list[str]:
         else:
             crosstab = pd.crosstab(base.loc[shared, "answer"].rename(variants[0]), o.loc[shared, "answer"])
             lines += [_table(crosstab.reset_index()), ""]
-    return lines
+    return lines, structured
 
 
 def cmd_check(args):
     rows, meta = load_dataset(args.dataset)
     roles = column_roles(meta)
     call = load_call(args.call)
-    responses = pd.concat([pd.read_json(p, lines=True, dtype=False) for p in args.answers], ignore_index=True)
+    # Each answers file is one run, named as `ask` recorded it. Grouping by run rather than by the
+    # states' variant keeps two calls asked on the same states apart.
+    asks = _latest(_read_ledger(args.ledger), "ask", "answers")
+    labels = [asks.get(str(p), {}).get("name") or Path(p).stem for p in args.answers]
+    if len(set(labels)) < len(labels):
+        labels = [Path(p).stem for p in args.answers]
+    responses = pd.concat([pd.read_json(p, lines=True, dtype=False).assign(variant=label)
+                           for p, label in zip(args.answers, labels)], ignore_index=True)
     responses = responses.merge(rows, on="row_id", how="left", validate="many_to_one")
     outcomes = args.outcomes.split(",") if args.outcomes else roles["outcomes"]
     report = [f"# Checks: {', '.join(call['questions'])}", "",
@@ -584,16 +675,96 @@ def cmd_check(args):
     ) if "input_tokens" in responses else None
     if cost is not None:
         report += ["## Cost per variant", "", _table(cost.reset_index()), ""]
+    results = {}
     for name, question in call["questions"].items():
         if question["type"] in ("choice", "boolean"):
-            report += _check_question(name, question["type"], _question_frame(responses, name), roles, outcomes, args)
+            lines, results[name] = _check_question(name, question["type"], _question_frame(responses, name), roles, outcomes, args)
+            report += lines
     report += ["## Reading these numbers", "",
                "- Outcomes say what happened next, not whether an answer was right. Lift is evidence, not accuracy.",
                "- Confidence is the model's own; check it against outcomes before trusting it.",
                "- A comparison is only a difference if its interval excludes zero.",
                "- One dataset and time span: rerun on another span before generalising.", ""]
     Path(args.out).write_text("\n".join(report))
+    _record(args, "check", report=str(args.out), dataset=str(args.dataset), run_id=meta["run_id"],
+            runs={label: {"answers": str(p), **{q: r.get(label) for q, r in results.items()}}
+                  for p, label in zip(args.answers, labels)})
     print(f"Report -> {args.out}")
+
+
+# ---------------------------------------------------------------------------
+# History
+
+
+def _changed(prev: dict | None, ask: dict, renders: dict, datasets: dict) -> str:
+    """What kind of change a run made against the one before it."""
+    if prev is None:
+        return "first run"
+    parts = []
+    if renders.get(ask["states"], {}).get("run_id") != renders.get(prev["states"], {}).get("run_id"):
+        parts.append("Signals data")
+    if ask["states_sha"] != prev["states_sha"] and not parts:
+        parts.append("state")
+    if ask["call_sha"] != prev["call_sha"]:
+        parts.append("question")
+    if ask["model"] != prev["model"]:
+        parts.append("model")
+    return ", ".join(parts) or "nothing"
+
+
+def cmd_history(args):
+    entries = _read_ledger(args.ledger)
+    if not entries:
+        sys.exit(f"No runs recorded in {args.ledger} yet.")
+    renders, datasets = _latest(entries, "render", "states"), _latest(entries, "dataset", "dataset")
+    # One row per answers file, at its latest ask, in the order the runs were first made.
+    asks = list(_latest(entries, "ask", "answers").values())
+    first = {e["answers"]: i for i, e in reversed(list(enumerate(entries))) if e["step"] == "ask"}
+    asks.sort(key=lambda e: first[e["answers"]])
+    checks = {}
+    for e in entries:
+        if e["step"] == "check":
+            for label, run in e["runs"].items():
+                checks[run["answers"]] = run
+
+    lines = ["# Runs", ""]
+    table, prev = [], None
+    for n, ask in enumerate(asks, 1):
+        render = renders.get(ask["states"], {})
+        builder = render.get("builder", {})
+        builder_v = ", ".join(f"{Path(f).name}@{h}" for f, h in builder.get("files", {}).items()) or builder.get("builtin", "")
+        table.append({"#": n, "run": ask["name"], "changed": _changed(prev, ask, renders, datasets),
+                      "note": ask.get("note") or "", "dataset run": (render.get("run_id") or "")[:8],
+                      "state builder": builder_v, "call": f"{Path(ask['call']).name}@{ask['call_sha']}",
+                      "model": ask["model"], "calls": ask["calls"], "spent_usd": ask["spent_usd"]})
+        prev = ask
+    lines += [_table(pd.DataFrame(table)), ""]
+
+    questions = [q for q in asks[-1]["questions"] if not args.question or q == args.question]
+    for q in questions:
+        runs = [(a["name"], (checks.get(a["answers"]) or {}).get(q)) for a in asks]
+        if not any(r for _, r in runs):
+            lines += [f"## {q}", "", "No checks recorded yet: run `check` on these answers.", ""]
+            continue
+        answers = list(dict.fromkeys(ans for _, r in runs if r for ans in r["by_answer"]))
+        lines += [f"## {q}: median confidence per answer", ""]
+        grid = [{"answer": ans, **{name: (r["by_answer"].get(ans, {}).get("median_confidence") if r else None)
+                                   for name, r in runs}} for ans in answers]
+        overall = {"answer": "_confident share_", **{name: r.get("confident_share") if r else None for name, r in runs}}
+        close = {"answer": "_close calls_", **{name: r.get("close_call_share") if r else None for name, r in runs}}
+        lines += [_table(pd.DataFrame(grid + [overall] + ([close] if any(close[n] is not None for n, _ in runs) else []))), ""]
+        last_name, last = next(((n, r) for n, r in reversed(runs) if r), (None, None))
+        rates = sorted({k for v in last["by_answer"].values() for k in v if k.endswith("_rate")})
+        if rates:
+            lines += [f"## {q}: outcomes per answer in {last_name}", ""]
+            lines += [_table(pd.DataFrame([{"answer": ans, "share": v.get("share"), **{k: v.get(k) for k in rates}}
+                                           for ans, v in last["by_answer"].items()])), ""]
+    text = "\n".join(lines)
+    if args.out:
+        Path(args.out).write_text(text)
+        print(f"History -> {args.out}")
+    else:
+        print(text)
 
 
 # ---------------------------------------------------------------------------
@@ -679,6 +850,7 @@ def main():
     p.add_argument("--out", required=True, help="directory for rows.jsonl and run.json")
     p.add_argument("--limit", type=int, default=10000)
     p.add_argument("--poll-seconds", type=float, default=5)
+    p.add_argument("--ledger", default="runs.jsonl", help="runs ledger to append to")
     p.set_defaults(func=cmd_dataset)
 
     p = sub.add_parser("render", help="turn dataset rows into model states")
@@ -693,6 +865,7 @@ def main():
     p.add_argument("--no-event-logs", action="store_true")
     p.add_argument("--collapse-repeats", action="store_true", help="drop consecutive identical entries (shaped)")
     p.add_argument("--out", required=True)
+    p.add_argument("--ledger", default="runs.jsonl", help="runs ledger to append to")
     p.set_defaults(func=cmd_render)
 
     p = sub.add_parser("ask", help="ask the call's questions for every state")
@@ -701,7 +874,10 @@ def main():
     p.add_argument("--model", help="override call.json's model: jev, jev:gateway, jev:typesafe, command:<cmd>")
     p.add_argument("--cache", default="answers_cache.jsonl")
     p.add_argument("--concurrency", type=int, default=12)
+    p.add_argument("--name", help="name for this run in the ledger (default: the answers file name)")
+    p.add_argument("--note", help="what this run changed and why, for the ledger")
     p.add_argument("--out", required=True)
+    p.add_argument("--ledger", default="runs.jsonl", help="runs ledger to append to")
     p.set_defaults(func=cmd_ask)
 
     p = sub.add_parser("check", help="label-free and outcome checks, plus variant comparison")
@@ -713,7 +889,14 @@ def main():
     p.add_argument("--bootstrap", type=int, default=1000)
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--out", required=True)
+    p.add_argument("--ledger", default="runs.jsonl", help="runs ledger to append to")
     p.set_defaults(func=cmd_check)
+
+    p = sub.add_parser("history", help="every run so far, version by version, from the runs ledger")
+    p.add_argument("--ledger", default="runs.jsonl")
+    p.add_argument("--question", help="only this question (default: all)")
+    p.add_argument("--out", help="write markdown here instead of printing it")
+    p.set_defaults(func=cmd_history)
 
     p = sub.add_parser("judge", help="sample answers for an LLM judge, or score its labels")
     p.add_argument("--question", required=True)

@@ -22,3 +22,8 @@ On the same anchors, the report shows how often answers change between variants 
 ## LLM judge
 
 `judge --score` gives agreement and Cohen's kappa between the model and the judge, overall and by the model's confidence. Use it to find where the model disagrees with a careful reader, not as accuracy. Have a person review a sample of disagreements.
+
+## History
+
+`history` reads `runs.jsonl` and puts every run side by side. The `changed` column says what each run changed against the one before: the question (`call.json`), the state (the state builder or its options), the Signals data (a different dataset run) or the model. Read the confidence grid row by row: an answer whose median confidence stays low across runs is where to look next, and a fix that moves the wrong answers shows up as a drop elsewhere. Close calls and the confident share are for the whole question. Outcomes are shown for the latest run only. Compare earlier runs with `check` on their answers files.
+

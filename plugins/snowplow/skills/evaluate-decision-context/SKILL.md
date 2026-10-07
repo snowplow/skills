@@ -25,7 +25,7 @@ The loop:
 6. **Change one thing and rerun on the same moments**, then compare.
 7. **Report** the numbers, what they do and don't show, and the versions used.
 
-All steps run through `scripts/decision_eval.py` (run it directly; `uv` installs its dependencies). Work in a directory of the user's choosing and keep every file there: it is the record of the evaluation.
+All steps run through `scripts/decision_eval.py` (run it directly; `uv` installs its dependencies). Work in a directory of the user's choosing and keep every file there: it is the record of the evaluation. `dataset`, `render`, `ask` and `check` also append what they did to `runs.jsonl` in that directory, with a hash and a copy (under `versions/`) of the call and the state builder each run used, so every answers file can be traced back to what produced it.
 
 ## Before you start
 
@@ -102,12 +102,13 @@ decision_eval.py render --dataset base --variant attributes_only --no-event-logs
 ## 4. Ask the model
 
 ```bash
-decision_eval.py ask --states states/app.jsonl --call call.json --out answers/app.jsonl
+decision_eval.py ask --states states/app.jsonl --call call.json --name baseline --note "the call as it ships" --out answers/app.jsonl
 ```
 
 - `jev` uses the Vercel AI Gateway if `AI_GATEWAY_API_KEY` is set, otherwise TypeSafe (`--model jev:gateway` or `jev:typesafe` to choose). All questions go in one request, as the application sends them.
 - `--model "command:python my_model.py"` runs any model: it reads JSONL `{id, state, questions}` on stdin and writes JSONL `{id, answers: {question: {answer, confidence?, probabilities?, probability_true?}}}`. Use it for the user's own prompt or classifier.
-- Answers are cached in `answers_cache.jsonl`, so reruns are free.
+- Answers are cached in `answers_cache.jsonl`, so reruns are free. Identical states are asked once and get the same answer.
+- Give every run a `--name` and a `--note` saying what changed and why ("merged comparing into researching"). They label the run in `history`.
 
 ## 5. Check
 
@@ -148,6 +149,14 @@ decision_eval.py dataset --request request_v2.json --out v2
 
 Change one thing at a time, so a comparison says what it changed.
 
+After each round, run `check` on the new answers, then show the user the whole sequence:
+
+```bash
+decision_eval.py history --out history.md
+```
+
+It lists every run with what changed against the one before (question, state, Signals data or model), the versions used and what it cost, then the median confidence for each answer across runs and the outcomes for the latest run. Edit `call.json` or the state builder in place if you like: the ledger keeps the earlier versions.
+
 ## 7. Report
 
 Give the user a short summary with:
@@ -155,7 +164,7 @@ Give the user a short summary with:
 - What was evaluated: the call (questions), when it's made (anchors), span, sample and seed, variants, model and route.
 - The key numbers from `report.md`, with intervals for comparisons, and what you'd change next.
 - What the numbers don't show (below).
-- Where the files are: `run.json`, `call.json`, the state builder, states and answers reproduce it.
+- Where the files are: `runs.jsonl` and `history.md` for the sequence of runs; `run.json`, `call.json`, the state builder (and `versions/`), states and answers reproduce each one.
 
 ## Be honest about what this shows
 
