@@ -54,7 +54,23 @@ Choice and yes/no (`boolean`, or TypeSafe's `noul`) questions get full checks; o
 
 The moment matters more than people expect: a call made at the first page of a session has little to go on. Discuss it with the user. Examples and details: `references/dataset-request.md`.
 
-**How the state is built** → which Signals data it reads, and a state builder. Note the service or attribute groups and the event logs the code reads, and copy the state-building logic into a small script that reads dataset rows (JSONL on stdin: attribute columns, event log arrays, `row_id`, `anchor_ts`) and prints `{"row_id": ..., "state": ...}` per row. Keep it as close to the application's code as possible; `examples/ga4/build_state.py` shows the shape. If the state uses data Signals doesn't have (the user's own database), tell the user that part won't be in the replay, or bring it in as extra columns on logged anchors.
+**How the state is built** → which Signals data it reads, and a state builder. Note the service or attribute groups and the event logs the code reads, and copy the state-building logic into a small script that reads dataset rows (JSONL on stdin: attribute columns, event log arrays, `row_id`, `anchor_ts`) and prints `{"row_id": ..., "state": ...}` per row. Keep it as close to the application's code as possible. The shape:
+
+```python
+import json, sys
+
+for line in sys.stdin:
+    row = json.loads(line)
+    recent = [{"event": e.get("action") or e["event_name"], "page": e.get("page_title")}
+              for e in (row.get("recent_activity") or [])[-10:]]
+    state = {
+        "visitor": {k: row[k] for k in ("page_views", "cart_adds", "device") if row.get(k)},
+        "last_10_events": recent,
+    }
+    print(json.dumps({"row_id": row["row_id"], "state": state}))
+```
+
+If the state uses data Signals doesn't have (the user's own database), tell the user that part won't be in the replay, or bring it in as extra columns on logged anchors.
 
 **What success looks like** → `outcomes.json`: events after the moment that the decision is meant to predict or change ("purchased later in the session", "added to cart within 10 minutes"). Propose them from the user's tracking; they're optional, but without them only label-free checks and the judge are possible.
 
