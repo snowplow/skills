@@ -186,7 +186,7 @@ def cmd_call_from_attribute(args):
     Path(args.out_call).write_text(json.dumps({"model": "jev", "questions": {attribute["name"]: question}}, indent=2) + "\n")
     anchors = {"mode": "trigger", "triggers": attribute["triggers"], "evaluation_policy": attribute["evaluation_policy"]}
     Path(args.out_anchors).write_text(json.dumps(anchors, indent=2) + "\n")
-    print(f"Wrote {args.out_call} and {args.out_anchors}. Contexts (event logs) used: {attribute['contexts']}. "
+    print(f"Wrote {args.out_call} and {args.out_anchors}. Agentic contexts used: {attribute['contexts']}. "
           "For boolean questions, describe the true and false answers in call.json.")
 
 
@@ -195,7 +195,7 @@ def cmd_call_from_attribute(args):
 
 
 def cmd_request(args):
-    client = SignalsClient() if (args.service or args.groups or args.event_logs) else None
+    client = SignalsClient() if (args.service or args.groups or args.agentic_contexts) else None
     groups = _read_definitions(args.groups_file or [])
     names = list(args.groups or [])
     if args.service:
@@ -205,9 +205,10 @@ def cmd_request(args):
                 "GET", f"registry/attribute_groups/{ref['name']}/versions/{ref['version']}")))
     for name in names:
         groups.append(_definition(client.request("GET", f"registry/attribute_groups/{name}")))
-    event_logs = _read_definitions(args.event_logs_file or [])
-    for name in args.event_logs or []:
-        event_logs.append(_definition(client.request("GET", f"registry/event_logs/{name}")))
+    # The registry still calls agentic context definitions event logs.
+    contexts = _read_definitions(args.agentic_contexts_file or [])
+    for name in args.agentic_contexts or []:
+        contexts.append(_definition(client.request("GET", f"registry/event_logs/{name}")))
 
     anchors = json.loads(Path(args.anchors).read_text())
     slug = _slug(args.name)
@@ -219,17 +220,17 @@ def cmd_request(args):
     request = {
         "anchors": anchors,
         "attributes": {"table_prefix": f"{slug}_attributes", "attribute_groups": groups},
-        "event_logs": event_logs,
+        "agentic_contexts": contexts,
         "outcomes": json.loads(Path(args.outcomes).read_text()) if args.outcomes else [],
         "dataset": {"table": f"{slug}_dataset"},
     }
     Path(args.out).write_text(json.dumps(request, indent=2) + "\n")
-    print(f"Wrote {args.out}: {anchors['mode']} anchors, {len(groups)} attribute groups, {len(event_logs)} event logs, "
+    print(f"Wrote {args.out}: {anchors['mode']} anchors, {len(groups)} attribute groups, {len(contexts)} agentic contexts, "
           f"{len(request['outcomes'])} outcomes. Review it before running.")
 
 
 def cmd_variant_request(args):
-    """Same anchors as a finished run, different context: only attributes and event logs are rebuilt."""
+    """Same anchors as a finished run, different context: only attributes and agentic contexts are rebuilt."""
     base = json.loads((Path(args.base) / "run.json").read_text())
     request = json.loads(Path(args.request).read_text())
     slug = _slug(args.name)
@@ -311,7 +312,7 @@ def column_roles(meta: dict) -> dict:
     request = meta["request"]
     return {
         "attributes": [a["name"] for g in request["attributes"]["attribute_groups"] for a in g.get("attributes", [])],
-        "event_logs": [e["name"] for e in request.get("event_logs", [])],
+        "agentic_contexts": [e["name"] for e in request.get("agentic_contexts", [])],
         "outcomes": [o["name"] for o in request.get("outcomes", [])],
     }
 
@@ -352,10 +353,10 @@ def _shape_entries(entries: list[dict], anchor: datetime, collapse_repeats: bool
     return shaped
 
 
-def _builtin_state(row: dict, args, attributes: list[str], event_logs: list[str]) -> dict:
+def _builtin_state(row: dict, args, attributes: list[str], contexts: list[str]) -> dict:
     profile = {a: _clean(row.get(a)) for a in attributes}
     state = {"profile": {k: v for k, v in profile.items() if v is not None}}
-    for name in event_logs:
+    for name in contexts:
         entries = row.get(name) or []
         if args.style == "shaped":
             entries = _shape_entries(entries, row["anchor_ts"].to_pydatetime(), args.collapse_repeats)
@@ -378,9 +379,9 @@ def cmd_render(args):
             sys.exit(f"State builder returned no state for {len(missing)} rows, e.g. {sorted(missing)[:3]}")
     else:
         attributes = args.attributes.split(",") if args.attributes else roles["attributes"]
-        event_logs = [] if args.no_event_logs else (
-            args.event_logs.split(",") if args.event_logs else roles["event_logs"])
-        states = {row["row_id"]: _builtin_state(row, args, attributes, event_logs)
+        contexts = [] if args.no_agentic_contexts else (
+            args.agentic_contexts.split(",") if args.agentic_contexts else roles["agentic_contexts"])
+        states = {row["row_id"]: _builtin_state(row, args, attributes, contexts)
                   for row in (r._asdict() for r in rows.itertuples(index=False))}
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -394,8 +395,8 @@ def cmd_render(args):
         files = [Path(t) for t in shlex.split(args.command) if Path(t).is_file()]
         builder = {"command": args.command, "files": {str(f): _keep_version(Path(args.ledger), f) for f in files}}
     else:
-        builder = {"builtin": args.style, "attributes": args.attributes, "event_logs": args.event_logs,
-                   "no_event_logs": args.no_event_logs, "collapse_repeats": args.collapse_repeats}
+        builder = {"builtin": args.style, "attributes": args.attributes, "agentic_contexts": args.agentic_contexts,
+                   "no_agentic_contexts": args.no_agentic_contexts, "collapse_repeats": args.collapse_repeats}
     _record(args, "render", states=str(out), states_sha=_sha(out.read_bytes()), dataset=str(args.dataset),
             run_id=meta["run_id"], variant=args.variant, builder=builder, median_chars=int(np.median(sizes)))
     print(f"{len(sizes)} states -> {out}; median {int(np.median(sizes))} characters, max {max(sizes)}")
@@ -827,8 +828,8 @@ def main():
     p.add_argument("--service", help="Signals service whose attribute groups are the context")
     p.add_argument("--groups", nargs="*", help="attribute group names to fetch from the registry")
     p.add_argument("--groups-file", nargs="*", help="attribute group definition files")
-    p.add_argument("--event-logs", nargs="*", help="event log names to fetch from the registry")
-    p.add_argument("--event-logs-file", nargs="*", help="event log definition files")
+    p.add_argument("--agentic-contexts", nargs="*", help="agentic context names to fetch from the registry")
+    p.add_argument("--agentic-contexts-file", nargs="*", help="agentic context definition files")
     p.add_argument("--outcomes", help="outcomes JSON file")
     p.add_argument("--start", help="span start (event and trigger anchors)")
     p.add_argument("--end", help="span end (event and trigger anchors)")
@@ -840,7 +841,7 @@ def main():
 
     p = sub.add_parser("variant-request", help="reuse a finished run's anchors with a different context")
     p.add_argument("--base", required=True, help="directory of the finished base run")
-    p.add_argument("--request", required=True, help="request with the changed attribute groups / event logs")
+    p.add_argument("--request", required=True, help="request with the changed attribute groups / agentic contexts")
     p.add_argument("--name", required=True)
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_variant_request)
@@ -858,11 +859,11 @@ def main():
     p.add_argument("--variant", required=True, help="name for this context variant")
     p.add_argument("--command", help="your state builder: dataset rows JSONL on stdin, {row_id, state} JSONL out")
     p.add_argument("--style", choices=["signals", "shaped"], default="signals",
-                   help="built-in states. signals: attributes and event log entries as Signals serves them; "
+                   help="built-in states. signals: attributes and agentic context entries as Signals serves them; "
                         "shaped: relative times and compact entries")
     p.add_argument("--attributes", help="comma-separated attributes to include (default: all)")
-    p.add_argument("--event-logs", help="comma-separated event logs to include (default: all)")
-    p.add_argument("--no-event-logs", action="store_true")
+    p.add_argument("--agentic-contexts", help="comma-separated agentic contexts to include (default: all)")
+    p.add_argument("--no-agentic-contexts", action="store_true")
     p.add_argument("--collapse-repeats", action="store_true", help="drop consecutive identical entries (shaped)")
     p.add_argument("--out", required=True)
     p.add_argument("--ledger", default="runs.jsonl", help="runs ledger to append to")

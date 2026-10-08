@@ -1,24 +1,24 @@
 ---
 name: evaluate-decision-context
-description: "Evaluate a decision model call (a System One model such as TypeSafe's Jev, or an LLM call) on past Snowplow traffic before it goes live or before changing it: rebuild the moments the application would have made the call, the Signals attributes and event logs it would have sent, and what happened next; ask the model; check the answers; and compare context variants on the same moments. Use when someone wants to test, backtest, replay or tune a Jev call, a decision prompt, an agentic attribute, or the context sent to a decision model. Triggers: evaluate decisions, backtest, replay sessions, offline evaluation, context engineering, Jev, System One, what would the model have said."
+description: "Evaluate a decision model call (a System One model such as TypeSafe's Jev, or an LLM call) on past Snowplow traffic before it goes live or before changing it: rebuild the moments the application would have made the call, the Signals attributes and agentic contexts it would have sent, and what happened next; ask the model; check the answers; and compare context variants on the same moments. Use when someone wants to test, backtest, replay or tune a Jev call, a decision prompt, an agentic attribute, or the context sent to a decision model. Triggers: evaluate decisions, backtest, replay sessions, offline evaluation, context engineering, Jev, System One, what would the model have said."
 compatibility: Needs uv (the script declares its own dependencies), a Signals API with dataset runs on Snowflake, and credentials for the model being evaluated.
 ---
 
 # Evaluate decision context
 
-You help someone find out how a decision model call behaves on their real traffic, and which context (attributes, event logs, how the state is built) makes its answers better. Signals rebuilds the past; the model answers; you run the checks and explain them honestly.
+You help someone find out how a decision model call behaves on their real traffic, and which context (attributes, agentic contexts, how the state is built) makes its answers better. Signals rebuilds the past; the model answers; you run the checks and explain them honestly.
 
 Start from the call the user already makes. Most have code like this, and that is what's being evaluated:
 
 ```python
-state = build_state(signals.get_attributes(...), signals.get_event_log("recent_activity", session_id))
+state = build_state(signals.get_attributes(...), signals.get_agentic_context("recent_activity", session_id))
 answers = jev.evaluate(state=state, questions={"shopping_stage": {...}, "show_discount": {...}})
 ```
 
 The loop:
 
 1. **Find the call**: its questions, where in the application it's made, and how the state is built.
-2. **Build the dataset**: the moments the call would have happened, with attributes and event logs as they stood, and outcome columns.
+2. **Build the dataset**: the moments the call would have happened, with attributes and agentic contexts as they stood, and outcome columns.
 3. **Render states** the way the application builds them, plus any variants to compare.
 4. **Ask the model** for every state, with the questions exactly as the application sends them. Answers are cached.
 5. **Check**: label-free checks, outcome checks, optionally an LLM judge on a sample.
@@ -30,7 +30,7 @@ All steps run through `scripts/decision_eval.py` (run it directly; `uv` installs
 ## Before you start
 
 - **Ask before anything that writes or costs money.** A dataset run creates tables in the user's warehouse (named by `--name`) and uses warehouse compute; model calls cost money (Jev is a few cents per 1,000 calls with small states). Say what will be created and roughly what it costs, and wait for a yes.
-- **Never publish or change** attribute groups, event logs, services or agentic attributes as part of an evaluation.
+- **Never publish or change** attribute groups, agentic contexts, services or agentic attributes as part of an evaluation.
 - Credentials come from the environment (`SIGNALS_API_URL` plus `SIGNALS_SANDBOX_TOKEN`, or `SIGNALS_API_KEY`, `SIGNALS_API_KEY_ID`, `SIGNALS_ORG_ID`; `AI_GATEWAY_API_KEY` or `TYPESAFE_API_KEY` for Jev). Never print them or write them to files.
 - Dataset runs need Snowflake.
 
@@ -54,7 +54,7 @@ Choice and yes/no (`boolean`, or TypeSafe's `noul`) questions get full checks; o
 
 The moment matters more than people expect: a call made at the first page of a session has little to go on. Discuss it with the user. Examples and details: `references/dataset-request.md`.
 
-**How the state is built** → which Signals data it reads, and a state builder. Note the service or attribute groups and the event logs the code reads, and copy the state-building logic into a small script that reads dataset rows (JSONL on stdin: attribute columns, event log arrays, `row_id`, `anchor_ts`) and prints `{"row_id": ..., "state": ...}` per row. Keep it as close to the application's code as possible. The shape:
+**How the state is built** → which Signals data it reads, and a state builder. Note the service or attribute groups and the agentic contexts the code reads, and copy the state-building logic into a small script that reads dataset rows (JSONL on stdin: attribute columns, agentic context arrays, `row_id`, `anchor_ts`) and prints `{"row_id": ..., "state": ...}` per row. Keep it as close to the application's code as possible. The shape:
 
 ```python
 import json, sys
@@ -77,13 +77,13 @@ If the state uses data Signals doesn't have (the user's own database), tell the 
 ## 2. Build the dataset
 
 ```bash
-decision_eval.py request --anchors anchors.json --service shopping --event-logs recent_activity \
+decision_eval.py request --anchors anchors.json --service shopping --agentic-contexts recent_activity \
   --outcomes outcomes.json --start 2026-01-01T00:00:00Z --end 2026-01-15T00:00:00Z \
   --sample 3000 --seed eval-v1 --name stage_eval --out request.json
 decision_eval.py dataset --request request.json --out base
 ```
 
-- Context comes from a service (`--service`), attribute group names (`--groups`) or files (`--groups-file`, `--event-logs-file`).
+- Context comes from a service (`--service`), attribute group names (`--groups`) or files (`--groups-file`, `--agentic-contexts-file`).
 - `--sample` uses a deterministic sample of sessions; the same seed and span give the same sessions. The download is capped at 10,000 rows.
 - Show the user `request.json` before running it. `base/run.json` records the run; `base/rows.jsonl` has one row per moment.
 
@@ -92,11 +92,11 @@ decision_eval.py dataset --request request.json --out base
 ```bash
 decision_eval.py render --dataset base --variant app --command "python build_state.py" --out states/app.jsonl
 decision_eval.py render --dataset base --variant signals --out states/signals.jsonl
-decision_eval.py render --dataset base --variant attributes_only --no-event-logs --out states/attributes_only.jsonl
+decision_eval.py render --dataset base --variant attributes_only --no-agentic-contexts --out states/attributes_only.jsonl
 ```
 
 - `app` (your state builder) is the baseline: what the application sends today.
-- Built-in variants are useful comparisons: `signals` (all attributes and event log entries as Signals serves them), `--style shaped` (relative times, compact entries; `--collapse-repeats` drops consecutive duplicates), `--no-event-logs`, `--attributes a,b`, `--event-logs x`.
+- Built-in variants are useful comparisons: `signals` (all attributes and agentic context entries as Signals serves them), `--style shaped` (relative times, compact entries; `--collapse-repeats` drops consecutive duplicates), `--no-agentic-contexts`, `--attributes a,b`, `--agentic-contexts x`.
 - To test a change to the application's state, copy the builder, change one thing, and render it as another variant.
 
 ## 4. Ask the model
@@ -138,7 +138,7 @@ Agreement isn't accuracy: you and the model can share blind spots. Offer a human
 ## 6. Change one thing and rerun
 
 - **Rendering, questions or model**: render or ask again on the same dataset; no new run needed.
-- **Different Signals data** (attributes, event log settings): keep the anchors and rebuild only the context:
+- **Different Signals data** (attributes, agentic context settings): keep the anchors and rebuild only the context:
 
 ```bash
 decision_eval.py variant-request --base base --request request_with_changes.json --name stage_eval_v2 --out request_v2.json

@@ -13,7 +13,7 @@
     "output": {"table": "stage_eval_anchors"}
   },
   "attributes": {"table_prefix": "stage_eval_attributes", "attribute_groups": ["<full group definitions>"]},
-  "event_logs": ["<full event log definitions>"],
+  "agentic_contexts": ["<full agentic context definitions>"],
   "outcomes": [
     {"name": "purchased_later", "criteria": {"all": [{"property": {"type": "atomic", "name": "event_name"}, "operator": "=", "value": "purchase"}]}},
     {"name": "cart_within_10m", "criteria": {"...": "..."}, "within_seconds": 600},
@@ -52,7 +52,7 @@ Three modes. `request` fills in the span, sample and output table for `event` an
 ## Context: what the model sees
 
 - **Attributes**: point-in-time values per anchor, for every attribute in `attribute_groups`. They include the anchor event in trigger mode, and in event mode with `include_anchor_event`; otherwise they stop just before the anchor.
-- **Event logs**: one array column per event log, holding the entries the streaming engine's buffer would have held: the same entry shape (projected properties, `event_id`, `event_name`, `page_urlpath`, `derived_tstamp`), trimmed to `max_age_seconds` and `max_events`, empty if the buffer would have expired. Snowflake only; selections by event specification aren't supported yet.
+- **Agentic contexts**: one array column per agentic context, holding the entries the streaming engine's buffer would have held: the same entry shape (projected properties, `event_id`, `event_name`, `page_urlpath`, `derived_tstamp`), trimmed to `max_age_seconds` and `max_events`, empty if the buffer would have expired. Snowflake only; selections by event specification aren't supported yet.
 
 ## Outcomes: what happened next
 
