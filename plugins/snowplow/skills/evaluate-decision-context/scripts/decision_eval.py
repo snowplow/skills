@@ -533,12 +533,14 @@ def cmd_ask(args):
             f.write(json.dumps({"row_id": item["row_id"], "variant": item["variant"], **response}) + "\n")
     cost = sum(r.get("cost_usd") or 0 for r in responses)
     spent = sum((r.get("cost_usd") or 0) for k, r in dict(zip(keys, responses)).items() if k not in cached_before)
+    tokens = [r["input_tokens"] for r in responses if r.get("input_tokens") is not None]
     states_path = Path(args.states)
     _record(args, "ask", name=args.name or Path(args.out).stem, note=args.note, answers=str(args.out),
             states=str(states_path), states_sha=_sha(states_path.read_bytes()),
             variants=sorted({i["variant"] for i in items}), model=resolved, call=str(args.call),
             call_sha=_keep_version(Path(args.ledger), Path(args.call)), questions=call["questions"],
-            calls=len(responses), new_calls=new_calls, cost_usd=round(cost, 4), spent_usd=round(spent, 4))
+            calls=len(responses), new_calls=new_calls, cost_usd=round(cost, 4), spent_usd=round(spent, 4),
+            median_input_tokens=int(np.median(tokens)) if tokens else None)
     print(f"{len(responses)} calls ({new_calls} new) -> {args.out}" + (f"; cost ${cost:.4f}" if cost else ""))
 
 
@@ -737,7 +739,8 @@ def cmd_history(args):
         table.append({"#": n, "run": ask["name"], "changed": _changed(prev, ask, renders, datasets),
                       "note": ask.get("note") or "", "dataset run": (render.get("run_id") or "")[:8],
                       "state builder": builder_v, "call": f"{Path(ask['call']).name}@{ask['call_sha']}",
-                      "model": ask["model"], "calls": ask["calls"], "spent_usd": ask["spent_usd"]})
+                      "model": ask["model"], "calls": ask["calls"], "tokens_per_call": ask.get("median_input_tokens"),
+                      "spent_usd": ask["spent_usd"]})
         prev = ask
     lines += [_table(pd.DataFrame(table)), ""]
 

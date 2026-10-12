@@ -8,7 +8,7 @@
 - **Confident share**: answers with confidence at least 0.6. High confidence with poor outcome numbers means the model is sure and wrong; don't trust confidence until it's checked against outcomes.
 - **Close calls** (choice): answers where the top two probabilities are within 0.2. Many close calls between the same two values usually means their descriptions overlap.
 - **Fingerprints** (`mean_<attribute>`): average attributes per answer. Each answer's group should look different in the way its description says (for example `ready_to_buy` with more cart adds). If two answers look alike, the model isn't separating them.
-- **Tokens and cost** per variant: what each context costs to send.
+- **Tokens and cost** per variant: what each context costs to send. Read them next to the other numbers: a variant that keeps the same confident share, close calls and lift with fewer tokens is the better context.
 
 ## Against outcomes
 
@@ -25,5 +25,5 @@ On the same anchors, the report shows how often answers change between variants 
 
 ## History
 
-`history` reads `runs.jsonl` and puts every run side by side. The `changed` column says what each run changed against the one before: the question (`call.json`), the state (the state builder or its options), the Signals data (a different dataset run) or the model. Read the confidence grid row by row: an answer whose median confidence stays low across runs is where to look next, and a fix that moves the wrong answers shows up as a drop elsewhere. Close calls and the confident share are for the whole question. Outcomes are shown for the latest run only. Compare earlier runs with `check` on their answers files.
+`history` reads `runs.jsonl` and puts every run side by side. The `changed` column says what each run changed against the one before: the question (`call.json`), the state (the state builder or its options), the Signals data (a different dataset run) or the model. Read the confidence grid row by row: an answer whose median confidence stays low across runs is where to look next, and a fix that moves the wrong answers shows up as a drop elsewhere. Close calls and the confident share are for the whole question. `tokens_per_call` is the median input tokens per call, so a shorter context shows up there. Outcomes are shown for the latest run only. Compare earlier runs with `check` on their answers files.
 

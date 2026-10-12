@@ -146,6 +146,7 @@ decision_eval.py dataset --request request_v2.json --out v2
 ```
 
 - **Different moments** (another event or trigger): a new dataset; results aren't directly comparable with the old moments.
+- **A shorter context**: once the answers look right, try sending less. Drop events that carry little signal (banner views, very short visits), replace repeated events with an attribute that counts them, and keep fewer or more recent entries in the agentic context. Keep the shorter variant if the confident share, close calls and outcome lift hold while tokens per call fall: every call costs less and returns sooner.
 
 Change one thing at a time, so a comparison says what it changed.
 
@@ -155,7 +156,7 @@ After each round, run `check` on the new answers, then show the user the whole s
 decision_eval.py history --out history.md
 ```
 
-It lists every run with what changed against the one before (question, state, Signals data or model), the versions used and what it cost, then the median confidence for each answer across runs and the outcomes for the latest run. Edit `call.json` or the state builder in place if you like: the ledger keeps the earlier versions.
+It lists every run with what changed against the one before (question, state, Signals data or model), the versions used, the median tokens per call and what it cost, then the median confidence for each answer across runs and the outcomes for the latest run. Edit `call.json` or the state builder in place if you like: the ledger keeps the earlier versions.
 
 ## 7. Report
 
