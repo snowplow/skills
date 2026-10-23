@@ -1,6 +1,16 @@
 # Snowplow plugin
 
-A vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/llms-support/snowplow-mcp/) and Snowplow skills. Installs into Claude Code, Cursor, or Codex.
+The Snowplow MCP server and skills for coding agents. One command installs them into Claude Code, Cursor, or Codex:
+
+```bash
+npx plugins add snowplow/skills
+```
+
+Then ask the agent for what you want tracked, for example: "Design a tracking plan for the checkout flow, create the schemas in Snowplow Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if validation rejects anything.
+
+You need a Snowplow Console account. The [free trial](https://snowplow.io/get-started/snowplow-free-trial) and the [Signals free tier](https://signals.snowplow.io/start) are hosted by Snowplow, need no credit card, and are provisioned in around 20 minutes. See the [Snowplow MCP server documentation](https://docs.snowplow.io/docs/ai/snowplow-mcp/) for the full install options and authentication.
+
+This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle: the MCP server configuration plus six skills.
 
 ## Install
 
@@ -29,7 +39,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
 
 ## What's included
 
-**MCP server** — `snowplow`, connected to `https://console.snowplowanalytics.com/api/agent/mcp` via `mcp-remote`.
+**MCP server** — `snowplow`, connected to `https://console.snowplowanalytics.com/api/agent/mcp` via `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas and tracking plans, pipeline health and failed events, enrichments, Signals, and documentation search. Actions run with the permissions of the Console account you log in with.
 
 **Skills:**
 - `tracking-design` — design event schemas, entities, and event specifications
