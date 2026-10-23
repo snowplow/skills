@@ -1,14 +1,16 @@
 # Snowplow plugin
 
-One command gives your coding agent a Snowplow account to work in:
+The Snowplow MCP server and skills for coding agents. One command installs them into Claude Code, Cursor, or Codex:
 
 ```bash
 npx plugins add snowplow/skills
 ```
 
-Then ask. "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong. It needs a Snowplow account: the [free trial](https://snowplow.io/get-started/snowplow-free-trial) or the [Signals free tier](https://signals.snowplow.io/start) is provisioned in about 20 minutes with no card and no infrastructure to run.
+Then ask the agent for what you want tracked, for example: "Design a tracking plan for the checkout flow, create the schemas in Snowplow Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if validation rejects anything.
 
-This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) and six Snowplow skills. It installs into Claude Code, Cursor, or Codex. The docs page [Set up Snowplow with an AI assistant](https://docs.snowplow.io/docs/get-started/ai-assistant/) walks through the first session.
+You need a Snowplow Console account. The [free trial](https://snowplow.io/get-started/snowplow-free-trial) and the [Signals free tier](https://signals.snowplow.io/start) are hosted by Snowplow, need no credit card, and are provisioned in around 20 minutes. The [Snowplow quickstart](https://docs.snowplow.io/docs/get-started/quickstart/) walks through the first session, and the [Snowplow MCP server documentation](https://docs.snowplow.io/docs/ai/snowplow-mcp/) covers the full install options and authentication.
+
+This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle: the MCP server configuration plus six skills.
 
 ## Install
 
