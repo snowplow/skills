@@ -7,7 +7,7 @@
     "name": "Snowplow Analytics",
     "url": "https://snowplow.io"
   },
-  "homepage": "https://docs.snowplow.io/docs/llms-support/snowplow-mcp/",
+  "homepage": "https://docs.snowplow.io/docs/ai/snowplow-mcp/",
   "license": "Apache-2.0",
   "keywords": ["snowplow", "analytics", "tracking", "mcp", "signals"]
 }

@@ -1,6 +1,14 @@
 # Snowplow plugin
 
-A vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/llms-support/snowplow-mcp/) and Snowplow skills. Installs into Claude Code, Cursor, or Codex.
+One command gives your coding agent a Snowplow account to work in:
+
+```bash
+npx plugins add snowplow/skills
+```
+
+Then ask. "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong. It needs a Snowplow account: the [free trial](https://snowplow.io/get-started/snowplow-free-trial) or the [Signals free tier](https://signals.snowplow.io/start) is provisioned in about 20 minutes with no card and no infrastructure to run.
+
+This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) and six Snowplow skills. It installs into Claude Code, Cursor, or Codex. The docs page [Set up Snowplow with an AI assistant](https://docs.snowplow.io/docs/get-started/ai-assistant/) walks through the first session.
 
 ## Install
 
@@ -29,7 +37,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
 
 ## What's included
 
-**MCP server** — `snowplow`, connected to `https://console.snowplowanalytics.com/api/agent/mcp` via `mcp-remote`.
+**MCP server** — `snowplow`, connected to `https://console.snowplowanalytics.com/api/agent/mcp` via `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas and tracking plans, pipeline health and failed events, enrichments, Signals, and documentation search. Actions run with the permissions of the Console account you log in with.
 
 **Skills:**
 - `tracking-design` — design event schemas, entities, and event specifications
