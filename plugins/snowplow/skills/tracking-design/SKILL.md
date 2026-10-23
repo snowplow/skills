@@ -1,25 +1,6 @@
 ---
 name: tracking-design
 description: "Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say \"tracking plan.\" Triggers: schema design, tracking plan, event spec, Iglu, entities, data product."
-tools:
-  - list_schemas
-  - get_schema_properties
-  - get_data_structure_by_hash
-  - create_schema_version
-  - create_event_specification
-  - update_event_specification
-  - list_event_specifications
-  - get_event_specification
-  - get_event_spec_metrics
-  - search_iglu_central
-  - list_tracking_plans
-  - get_tracking_plan
-  - create_tracking_plan
-  - edit_tracking_plan
-  - list_data_catalog
-  - search_data_catalog
-  - list_source_apps
-  - get_source_app
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -171,3 +152,24 @@ If a user says "data product", interpret it as "tracking plan" — same concept,
 - SchemaVer format is MAJOR-MINOR-PATCH (e.g., "1-0-0")
 - Iglu URIs follow format: iglu:vendor/name/format/version
 - Property instructions help developers implement tracking correctly
+
+## Tools
+
+- `list_schemas` — existing schemas and their deployment status
+- `get_schema_properties` — field names, types, and requirements for a schema
+- `get_data_structure_by_hash` — resolve a Console `/data-structures/<hash>` URL to the schema it refers to
+- `create_schema_version` — create a new schema version (event or entity; never edit published ones)
+- `search_iglu_central` — search public schemas for reuse
+- `list_tracking_plans` — tracking plans (formerly data products)
+- `get_tracking_plan` — one plan with its event specs and inherited source-app entities
+- `create_tracking_plan` — create a tracking plan
+- `edit_tracking_plan` — edit a tracking plan's metadata (name, description, domain, access instructions) — only the fields you pass are changed
+- `list_event_specifications` — list event specs (optional `dataProductId` filter)
+- `get_event_specification` — full event spec details
+- `create_event_specification` — create an event spec (event schema + all entities in one call)
+- `update_event_specification` — update an existing event spec
+- `get_event_spec_metrics` — event volume metrics for a spec
+- `list_data_catalog` — tracked schemas and their relationships
+- `search_data_catalog` — search the catalog by name, vendor, or description
+- `list_source_apps` — source applications linked to tracking plans
+- `get_source_app` — source app details and the entities it provides
