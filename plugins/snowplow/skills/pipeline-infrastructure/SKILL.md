@@ -1,15 +1,6 @@
 ---
 name: pipeline-infrastructure
 description: "Explore pipeline infrastructure including collector configuration, enrichment settings, pipeline metrics (throughput, latency, loaders), mini pipelines, and Micro instances. Use when users ask about their setup, endpoints, pipeline health, performance, or how their pipeline is configured. Use this skill whenever a user asks about pipeline state, throughput, or how their pipeline is wired up. Triggers: pipeline status, collector endpoint, enrichment latency, loader, throughput, CNAME, cookie policy."
-tools:
-  - list_pipelines
-  - get_pipeline
-  - get_pipeline_metrics
-  - get_collector_config
-  - list_minis
-  - list_micros
-  - list_enrichments
-  - get_failed_events_metrics
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -118,3 +109,14 @@ After showing the infrastructure state, proactively suggest improvements:
 - Collector config changes are async (202 Accepted) — they take effect after a brief delay
 - The metrics v2 endpoint supports a `from` parameter (e.g. P-7D, P-1D, P-1M) for the time range
 - Loaders with failedEventsLoader=true load failed/bad events to a separate destination for recovery
+
+## Tools
+
+- `list_pipelines` — all pipelines with status, labels, and collector endpoints
+- `get_pipeline` — one pipeline's config including enrichment settings (enrichAcceptInvalid, atomicFieldsLimits)
+- `get_pipeline_metrics` — collector/enrichment/loader health and bad rows (supports `from`, e.g. `P-7D`)
+- `get_collector_config` — CNAME, cookie policy, custom paths, encryption settings
+- `list_minis` — mini pipelines (enrichment-only) and their endpoints
+- `list_micros` — Micro instances for local development and testing
+- `list_enrichments` — enrichments active on a pipeline
+- `get_failed_events_metrics` — failed event / bad row counts for deeper investigation
