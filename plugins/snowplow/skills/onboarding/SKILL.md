@@ -40,7 +40,7 @@ Offer the guided setup, start it only if the user says yes.
 | 1 | Inventory | Trial or existing customer, pipeline id, collector host, Micro endpoint, vendor, target app and platform recorded | `references/inventory.md` |
 | 1b | Demo app | Only when Stage 1 found no app: the demo shop runs locally | `references/demo-app.md` |
 | 2 | Design | A JSON Schema per entity and event in the progress file | `references/design.md` |
-| 3 | Create in Console | Every schema in PROD, every event spec `published` | `references/console-setup.md` |
+| 3 | Create in Console | Trial: every schema in PROD, every event spec `published`. Existing customer: every schema in DEV, every spec created | `references/console-setup.md` |
 | 4 | Instrument | Tracker initialised, Snowtype code generated and wired, app builds | `references/instrumentation.md` |
 | 5 | Verify | Every spec seen in Micro as a good event, no bad events for the app | `references/verify.md` |
 | 6 | Destination | `list_destinations` shows an active warehouse or lake, tracker on the pipeline collector, one round of events sent | `references/destination.md` |
