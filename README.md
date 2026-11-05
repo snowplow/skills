@@ -91,6 +91,7 @@ The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api
 
 | Skill | What it does |
 | --- | --- |
+| [`onboarding`](plugins/snowplow/skills/onboarding/SKILL.md) | Walks you through a first end-to-end setup: builds a demo app when there is none, designs and creates a tracking plan, instruments the app, verifies events in Micro, connects a warehouse, and runs the first query |
 | [`tracking-design`](plugins/snowplow/skills/tracking-design/SKILL.md) | Designs event and entity schemas, event specifications, and tracking plans, and creates them in Console once you approve the design |
 | [`implementation-guidance`](plugins/snowplow/skills/implementation-guidance/SKILL.md) | Adds Snowplow trackers to web, mobile, and server-side apps, and guides you through testing with Snowplow Micro and the rollout from DEV to PROD |
 | [`troubleshooting`](plugins/snowplow/skills/troubleshooting/SKILL.md) | Diagnoses missing events, failed events, schema validation errors, and enrichment failures, and suggests a fix |
