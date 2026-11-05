@@ -19,7 +19,7 @@ Forks. SSO organization, device login fails: the user creates the key in Console
 
 ## Platform table
 
-| Platform | Source app `tracker` | Snowtype `-t` | Snowtype `-l` | Docs |
+| Platform | Source app `tracker` | Snowtype `tracker` | Snowtype `language` | Docs |
 |---|---|---|---|---|
 | Web, npm | `javascript` | `@snowplow/browser-tracker` | `typescript` or `javascript` | [Web trackers](https://docs.snowplow.io/docs/sources/web-trackers.md) |
 | Web, script tag | `javascript` | `@snowplow/javascript-tracker` | `javascript` | [Web trackers](https://docs.snowplow.io/docs/sources/web-trackers.md) |
@@ -49,13 +49,23 @@ Collector hosts: Micro `https://<id>.apps.snowplowanalytics.com`, pipeline `<nam
 
 ## Snowtype
 
-Node 18 or newer. Use the organization id from `get_organization`, the tracker and language from the platform table, and the tracking plan id from Stage 3. `init` writes the config without a plan, `patch` adds the plan to it, `generate` reads it:
+Node 18 or newer. Write `snowtype.config.json` at the app root with this content, replacing the placeholders with the organization id from `get_organization`, the tracker and language from the platform table and the tracking plan id from Stage 3:
 
+```json
+{
+  "organizationId": "<org-id>",
+  "tracker": "<tracker>",
+  "language": "<language>",
+  "outpath": "./src/snowplow",
+  "igluCentralSchemas": [],
+  "dataStructures": [],
+  "repositories": [],
+  "eventSpecificationIds": [],
+  "dataProductIds": ["<tracking-plan-id>"]
+}
 ```
-npx @snowplow/snowtype@latest init -i <org-id> -t <tracker> -l <language> -o <outpath>
-npx @snowplow/snowtype@latest patch --dataProductIds <tracking-plan-id>
-npx @snowplow/snowtype@latest generate
-```
+
+Then run `npx @snowplow/snowtype@latest generate`.
 
 Output: one source file with a `create<Entity>` function per entity and a `track<Spec>Spec` function per event spec in TypeScript and JavaScript, `to<Spec>Spec()` extension functions on the generated event types in Swift and Kotlin, and `.snowtype-lock.json` pinning the spec versions. Commit all of it. After the plan changes run `npx @snowplow/snowtype@latest update --yes` then `generate` again. `update --latestDraft` picks up draft specs, which is what an existing customer at DEV needs. Snowtype does not install the tracker and cannot generate for template plans.
 
@@ -77,7 +87,7 @@ Without Snowtype: call the tracker's self-describing event method with the event
 
 ## CLI events
 
-For a target without code yet, to exercise the Micro without driving the app, or to test the schemas in Stage 5, send one event per spec with the CLI:
+For a target without code yet, to exercise the Micro without driving the app, or to test the schemas in Stage 5, send one event per spec with the CLI. `--collector` takes the host without the scheme, so for the Micro drop the `https://`:
 
 ```
 snowplow-cli events send --collector <collector-host> --app-id acme-web \
