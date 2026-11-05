@@ -1,6 +1,6 @@
 # Snowplow plugin for AI coding agents
 
-Connect your coding agent to your Snowplow account. This plugin bundles the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) with six Snowplow skills, so the agent can design your tracking, create the schemas, add the tracker to your app, and fix failed events.
+Connect your coding agent to your Snowplow account. This plugin bundles the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) with Snowplow skills, so the agent can design your tracking, create the schemas, add the tracker to your app, and fix failed events.
 
 ```bash
 npx plugins add snowplow/skills
@@ -57,7 +57,7 @@ If the browser doesn't open in Claude Code, run `/mcp`, select the Snowplow serv
 
 ## What's included
 
-The plugin has one MCP server and six skills.
+The plugin has one MCP server and a set of Snowplow skills.
 
 ### MCP server
 

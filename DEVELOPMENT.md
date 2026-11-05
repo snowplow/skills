@@ -17,7 +17,7 @@ This page explains how the repository is laid out and how to test a change befor
 │       ├── .plugin/
 │       │   └── plugin.json       # open-plugin manifest
 │       ├── .mcp.json             # Snowplow MCP server (shared)
-│       └── skills/               # six bundled SKILL.md files (shared)
+│       └── skills/               # bundled SKILL.md files (shared)
 └── server.json                   # MCP Registry entry for the Snowplow MCP server
 ```
 
@@ -42,7 +42,7 @@ The manifests are kept in sync by hand. When you change plugin metadata, such as
 - Update both `.claude-plugin/marketplace.json` and `.plugin/marketplace.json` if the change affects the catalog entry.
 - Bump `version` in both `plugin.json` files when you release a change.
 
-To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table and the skill count in the [README](README.md).
+To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table in the [README](README.md).
 
 ## Test locally
 
