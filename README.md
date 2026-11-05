@@ -8,7 +8,7 @@ npx plugins add snowplow/skills
 
 Then ask. For example: "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong.
 
-For a guided first session, see [Snowplow quickstart with your coding agent](https://docs.snowplow.io/docs/get-started/quickstart/).
+For a guided first session, see [Snowplow quickstart with your coding agent](https://docs.snowplow.io/docs/get-started/quickstart/). For more prompts to try, such as checking pipeline status or reviewing recent failed events, see [Example prompts](https://docs.snowplow.io/docs/ai/snowplow-mcp/#example-prompts).
 
 ## Before you start
 
@@ -54,6 +54,22 @@ To connect only the Snowplow MCP server, without the skills, in a client such as
 The first time the agent uses a Snowplow tool, a browser window opens so you can log in to Snowplow Console. The agent then works with the permissions of your Console account: it can see and change only what you can.
 
 If the browser doesn't open in Claude Code, run `/mcp`, select the Snowplow server, and choose **Authenticate**. To work in a different organization, or to use a Console API key instead of a browser login, see [Authentication](https://docs.snowplow.io/docs/ai/snowplow-mcp/#authentication).
+
+## Update or remove
+
+To update the plugin to the latest version, run the install command again:
+
+```bash
+npx plugins add snowplow/skills
+```
+
+In Claude Code, you can also manage the plugin from the `/plugin` menu. To remove it, run:
+
+```text
+/plugin uninstall snowplow@snowplow
+```
+
+In other agents, remove the plugin from the agent's plugin or MCP settings.
 
 ## What's included
 

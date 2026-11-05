@@ -8,6 +8,27 @@
     "url": "https://snowplow.io"
   },
   "homepage": "https://docs.snowplow.io/docs/ai/snowplow-mcp/",
+  "repository": "https://github.com/snowplow/skills",
   "license": "Apache-2.0",
-  "keywords": ["snowplow", "analytics", "tracking", "mcp", "signals"]
+  "keywords": [
+    "snowplow",
+    "analytics",
+    "tracking",
+    "mcp",
+    "signals",
+    "skills",
+    "behavioral data",
+    "customer data infrastructure",
+    "event tracking",
+    "tracking plan",
+    "event schema",
+    "iglu",
+    "data quality",
+    "failed events",
+    "data pipeline",
+    "enrichment",
+    "real-time personalization",
+    "customer attributes",
+    "agentic context"
+  ]
 }
