@@ -61,7 +61,7 @@ The plugin has one MCP server and a set of Snowplow skills.
 
 ### MCP server
 
-The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api/agent/mcp` through [`mcp-remote`](https://www.npmjs.com/package/mcp-remote). It exposes the same tools as the Snowplow Assistant in Console: schemas, event specifications, and tracking plans; source applications; pipeline configuration, health metrics, and failed events; enrichments and data quality alerts; Signals; and Snowplow documentation search.
+The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api/agent/mcp` through `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas, event specifications, and tracking plans; source applications; pipeline configuration, health metrics, and failed events; enrichments and data quality alerts; Signals; and Snowplow documentation search.
 
 ### Skills
 
