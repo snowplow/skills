@@ -14,7 +14,7 @@ For a guided first session, see [Snowplow quickstart with your coding agent](htt
 
 You need:
 
-- **A Snowplow account.** [Sign up](https://snowplow.io/get-started/sign-up) for the Snowplow Free Trial, or for the [Signals Free Tier](https://signals.snowplow.io/start). Either one is provisioned in about 20 minutes, with no credit card and no infrastructure to run. If you already use Snowplow, log in with your existing Console account.
+- **A Snowplow account.** [Sign up](https://snowplow.io/get-started/sign-up) for the Snowplow Free Trial, or for the [Signals Free Tier](https://signals.snowplow.io/start). Either one is ready within minutes, with no credit card and no infrastructure to run. If you already use Snowplow, log in with your existing Console account.
 - **Node.js**, which runs the installer and the MCP connector (`mcp-remote`) through `npx`.
 - **A coding agent**, such as Claude Code, Cursor, or Codex.
 
