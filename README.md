@@ -1,87 +1,85 @@
-# Snowplow plugin
+# Snowplow plugin for AI coding agents
 
-One command gives your coding agent a Snowplow account to work in:
+Connect your coding agent to your Snowplow account. This plugin bundles the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) with six Snowplow skills, so the agent can design your tracking, create the schemas, add the tracker to your app, and fix failed events.
 
 ```bash
 npx plugins add snowplow/skills
 ```
 
-Then ask. "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong. It needs a Snowplow account: the [free trial](https://snowplow.io/get-started/snowplow-free-trial) or the [Signals free tier](https://signals.snowplow.io/start) is provisioned in about 20 minutes with no card and no infrastructure to run.
+Then ask. For example: "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong.
 
-This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) and six Snowplow skills. It installs into Claude Code, Cursor, or Codex. The docs page [Set up Snowplow with an AI assistant](https://docs.snowplow.io/docs/get-started/ai-assistant/) walks through the first session.
+For a guided first session, see [Snowplow quickstart with your coding agent](https://docs.snowplow.io/docs/get-started/quickstart/).
+
+## Before you start
+
+You need:
+
+- **A Snowplow account.** [Sign up](https://snowplow.io/get-started/sign-up) for the Snowplow Free Trial, or for the [Signals Free Tier](https://signals.snowplow.io/start). Either one is provisioned in about 20 minutes, with no credit card and no infrastructure to run. If you already use Snowplow, log in with your existing Console account.
+- **Node.js**, which runs the installer and the MCP connector (`mcp-remote`) through `npx`.
+- **A coding agent**, such as Claude Code, Cursor, or Codex.
 
 ## Install
 
-### Claude Code (native marketplace)
+### Any agent (recommended)
+
+The [`plugins` CLI](https://www.npmjs.com/package/plugins) detects the coding agents on your machine, including Claude Code, Cursor, and Codex, and installs the plugin into each of them:
+
+```bash
+npx plugins add snowplow/skills
+```
+
+To install into one agent only, pass `--target`:
+
+```bash
+npx plugins add snowplow/skills --target claude-code
+```
+
+Run `npx plugins targets` to list the agents the CLI detects.
+
+### Claude Code marketplace
+
+In Claude Code, you can also add this repository as a plugin marketplace and install from it:
 
 ```text
 /plugin marketplace add snowplow/skills
 /plugin install snowplow@snowplow
 ```
 
-Claude Code reads the committed `.claude-plugin/` files directly from the repo.
+### Other MCP clients
 
-### Any agent (vendor-neutral open-plugin)
+To connect only the Snowplow MCP server, without the skills, in a client such as Claude.ai or Claude Desktop, follow [Configure the MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/#configure-the-mcp-server).
 
-```bash
-npx plugins add snowplow/skills
-```
+## Log in
 
-The CLI auto-detects which agent tools are on your machine and installs to all of them. To target one:
+The first time the agent uses a Snowplow tool, a browser window opens so you can log in to Snowplow Console. The agent then works with the permissions of your Console account: it can see and change only what you can.
 
-```bash
-npx plugins add snowplow/skills --target claude-code
-```
-
-The first time you use a Snowplow MCP tool, a browser window opens to authenticate via your Snowplow Console account. Permissions follow your account access level.
+If the browser doesn't open in Claude Code, run `/mcp`, select the Snowplow server, and choose **Authenticate**. To work in a different organization, or to use a Console API key instead of a browser login, see [Authentication](https://docs.snowplow.io/docs/ai/snowplow-mcp/#authentication).
 
 ## What's included
 
-**MCP server** — `snowplow`, connected to `https://console.snowplowanalytics.com/api/agent/mcp` via `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas and tracking plans, pipeline health and failed events, enrichments, Signals, and documentation search. Actions run with the permissions of the Console account you log in with.
+The plugin has one MCP server and six skills.
 
-**Skills:**
-- `tracking-design` — design event schemas, entities, and event specifications
-- `implementation-guidance` — instrument Snowplow trackers in applications
-- `signals` — manage real-time customer attributes, services, and interventions
-- `pipeline-infrastructure` — collector, enrichment, pipeline metrics, mini pipelines
-- `console-operations` — pipelines, enrichments, tracking plans, alerts, source apps
-- `troubleshooting` — diagnose failed events, schema errors, enrichment problems
+### MCP server
 
-## Layout
+The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api/agent/mcp` through [`mcp-remote`](https://www.npmjs.com/package/mcp-remote). It exposes the same tools as the Snowplow Assistant in Console: schemas, event specifications, and tracking plans; source applications; pipeline configuration, health metrics, and failed events; enrichments and data quality alerts; Signals; and Snowplow documentation search.
 
-```
-.
-├── .claude-plugin/
-│   └── marketplace.json          # Claude Code native catalog
-├── .plugin/
-│   └── marketplace.json          # open-plugin catalog
-└── plugins/
-    └── snowplow/
-        ├── .claude-plugin/
-        │   └── plugin.json       # Claude Code native manifest
-        ├── .plugin/
-        │   └── plugin.json       # open-plugin manifest
-        ├── .mcp.json             # Snowplow MCP server (shared)
-        └── skills/               # six bundled SKILL.md files (shared)
-```
+### Skills
 
-Two manifest formats coexist so the repo works as both a native Claude Code marketplace and a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle:
+You don't need to call a skill by name. The agent loads the matching skill when your request needs it.
 
-- **`.claude-plugin/`** — read directly by Claude Code's `/plugin marketplace add`. Keep these in sync by hand when metadata changes.
-- **`.plugin/`** — the vendor-neutral [open-plugin format](https://github.com/vercel-labs/plugins). The `plugins` CLI translates them into target-specific formats (`.claude-plugin/`, `.cursor-plugin/`, `.codex-plugin/`) at install time for Claude Code, Cursor, or Codex.
+| Skill | What it does |
+| --- | --- |
+| [`tracking-design`](plugins/snowplow/skills/tracking-design/SKILL.md) | Designs event schemas, entities, event specifications, and tracking plans, and creates them in Console once you approve the design |
+| [`implementation-guidance`](plugins/snowplow/skills/implementation-guidance/SKILL.md) | Adds Snowplow trackers to web, mobile, and server-side apps, tests the events with Snowplow Micro, and guides the rollout from DEV to PROD |
+| [`troubleshooting`](plugins/snowplow/skills/troubleshooting/SKILL.md) | Diagnoses missing events, failed events, schema validation errors, and enrichment failures, and suggests a fix |
+| [`pipeline-infrastructure`](plugins/snowplow/skills/pipeline-infrastructure/SKILL.md) | Inspects pipelines, collector configuration, enrichments, and health metrics, plus mini pipelines and Micro instances, without changing anything |
+| [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
+| [`signals`](plugins/snowplow/skills/signals/SKILL.md) | Manages Signals attribute keys, attribute groups, services, interventions, and Agentic Context, and publishes them |
 
-The `.mcp.json` and `skills/` are shared by both — no duplication there.
+## Contributing
 
-## Local development
+To change the plugin, test it locally, or see how the repository is laid out, read [DEVELOPMENT.md](DEVELOPMENT.md).
 
-To test changes without publishing:
+## License
 
-```bash
-npx plugins add /path/to/snowplow-skills
-```
-
-Inspect without installing:
-
-```bash
-npx plugins discover snowplow/skills
-```
+[Apache License 2.0](LICENSE)
