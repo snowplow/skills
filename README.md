@@ -100,6 +100,10 @@ You don't need to call a skill by name. The agent loads the matching skill when 
 | [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
 | [`signals`](plugins/snowplow/skills/signals/SKILL.md) | Manages Signals attribute keys, attribute groups, services, interventions, and Agentic Context, and publishes them |
 
+## Get help
+
+For questions about the plugin or your Snowplow account, contact [Snowplow Support](https://support.snowplow.io/). If you'd like to see how Snowplow fits your use case, you can also [book a demo](https://snowplow.io/get-started/book-a-demo-of-snowplow-bdp).
+
 ## Contributing
 
 To change the plugin, test it locally, or see how the repository is laid out, read [DEVELOPMENT.md](DEVELOPMENT.md).
