@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.snowplow/mcp",
+  "name": "io.snowplow/console",
   "title": "Snowplow MCP Server",
   "description": "Design Snowplow tracking plans and schemas, debug failed events, and manage pipelines and Signals.",
   "version": "1.0.0",
