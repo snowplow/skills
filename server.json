@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.snowplow/console",
-  "title": "Snowplow MCP",
-  "description": "Manage a Snowplow account from an AI assistant: design tracking plans, create schemas, check pipeline health and failed events, and configure Snowplow Signals.",
+  "title": "Snowplow MCP Server",
+  "description": "Design Snowplow tracking plans and schemas, debug failed events, and manage pipelines and Signals.",
   "version": "1.0.0",
   "websiteUrl": "https://docs.snowplow.io/docs/ai/snowplow-mcp/",
   "repository": {
@@ -14,5 +14,25 @@
       "type": "streamable-http",
       "url": "https://console.snowplowanalytics.com/api/agent/mcp"
     }
-  ]
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "keywords": [
+        "snowplow",
+        "behavioral data",
+        "customer data infrastructure",
+        "event tracking",
+        "analytics",
+        "tracking plan",
+        "event schema",
+        "iglu",
+        "data quality",
+        "data pipeline",
+        "snowplow signals",
+        "real-time personalization",
+        "customer attributes",
+        "agentic context"
+      ]
+    }
+  }
 }
