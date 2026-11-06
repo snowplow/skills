@@ -15,7 +15,7 @@ For a guided first session, see [Snowplow quickstart with your coding agent](htt
 You need:
 
 - **A Snowplow account.** [Sign up](https://snowplow.io/get-started/sign-up) for the Snowplow Free Trial, or for the [Signals Free Tier](https://signals.snowplow.io/start). Either one is ready within minutes, with no credit card and no infrastructure to run. If you already use Snowplow, log in with your existing Console account.
-- **Node.js**, which runs the installer and the MCP connector (`mcp-remote`) through `npx`. To install it, follow [Download Node.js](https://nodejs.org/en/download) on the official Node.js site.
+- **Node.js 18 or later**, which runs the installer and the MCP connector (`mcp-remote`) through `npx`. To install it, follow [Download Node.js](https://nodejs.org/en/download) on the official Node.js site.
 - **A coding agent**, such as Claude Code, Cursor, or Codex.
 
 ## Install
@@ -57,13 +57,21 @@ If the browser doesn't open in Claude Code, run `/mcp`, select the Snowplow serv
 
 ## Update or remove
 
-To update the plugin to the latest version, run the install command again:
+If you installed with the `plugins` CLI, run the install command again to update:
 
 ```bash
 npx plugins add snowplow/skills
 ```
 
-In Claude Code, you can also manage the plugin from the `/plugin` menu. To remove it, run:
+If you installed from the Claude Code marketplace, update from your shell:
+
+```bash
+claude plugin update snowplow@snowplow
+```
+
+Claude Code doesn't auto-update third-party marketplaces by default. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `snowplow`, and choose **Enable auto-update**.
+
+To remove the plugin from Claude Code, run:
 
 ```text
 /plugin uninstall snowplow@snowplow
@@ -77,7 +85,7 @@ The plugin has one MCP server and a set of Snowplow skills.
 
 ### MCP server
 
-The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api/agent/mcp` through `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas, event specifications, and tracking plans; source applications; pipeline configuration, health metrics, and failed events; enrichments and data quality alerts; Signals; and Snowplow documentation search.
+The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api/agent/mcp` through `mcp-remote`. It exposes the same tools as the Snowplow Assistant in Console: schemas, event specifications, and tracking plans; source applications; pipeline configuration, health metrics, and failed events; enrichments and data quality alerts; the data catalog; Signals; and Snowplow documentation search.
 
 ### Skills
 
@@ -85,8 +93,8 @@ You don't need to call a skill by name. The agent loads the matching skill when 
 
 | Skill | What it does |
 | --- | --- |
-| [`tracking-design`](plugins/snowplow/skills/tracking-design/SKILL.md) | Designs event schemas, entities, event specifications, and tracking plans, and creates them in Console once you approve the design |
-| [`implementation-guidance`](plugins/snowplow/skills/implementation-guidance/SKILL.md) | Adds Snowplow trackers to web, mobile, and server-side apps, tests the events with Snowplow Micro, and guides the rollout from DEV to PROD |
+| [`tracking-design`](plugins/snowplow/skills/tracking-design/SKILL.md) | Designs event and entity schemas, event specifications, and tracking plans, and creates them in Console once you approve the design |
+| [`implementation-guidance`](plugins/snowplow/skills/implementation-guidance/SKILL.md) | Adds Snowplow trackers to web, mobile, and server-side apps, and guides you through testing with Snowplow Micro and the rollout from DEV to PROD |
 | [`troubleshooting`](plugins/snowplow/skills/troubleshooting/SKILL.md) | Diagnoses missing events, failed events, schema validation errors, and enrichment failures, and suggests a fix |
 | [`pipeline-infrastructure`](plugins/snowplow/skills/pipeline-infrastructure/SKILL.md) | Inspects pipelines, collector configuration, enrichments, and health metrics, plus mini pipelines and Micro instances, without changing anything |
 | [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
