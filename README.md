@@ -102,7 +102,7 @@ You don't need to call a skill by name. The agent loads the matching skill when 
 
 ## Get help
 
-For questions about the plugin or your Snowplow account, contact [Snowplow Support](https://support.snowplow.io/). If you'd like to see how Snowplow fits your use case, you can also [book a demo](https://snowplow.io/get-started/book-a-demo-of-snowplow-bdp).
+For questions about the plugin or your Snowplow account, contact [Snowplow Support](https://support.snowplow.io/). If you'd like to see how Snowplow fits your use case, you can also [Book a Demo](https://snowplow.io/get-started/book-a-demo-of-snowplow-bdp).
 
 ## Contributing
 
