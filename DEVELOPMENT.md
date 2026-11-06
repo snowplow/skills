@@ -23,7 +23,7 @@ This page explains how the repository is laid out and how to test a change befor
 
 ### Manifest formats
 
-Two manifest formats coexist, so the repository works both as a native Claude Code marketplace and as a vendor-neutral open-plugin bundle for the [`plugins` CLI](https://www.npmjs.com/package/plugins):
+Two manifest formats coexist, so the repository works both as a native Claude Code marketplace and as a vendor-neutral open-plugin bundle for the [plugins CLI](https://www.npmjs.com/package/plugins):
 
 - **`.claude-plugin/`**: read directly by Claude Code's `/plugin marketplace add`.
 - **`.plugin/`**: the vendor-neutral open-plugin format. At install time, the `plugins` CLI translates it into the format each agent expects, such as `.claude-plugin/`, `.cursor-plugin/`, or `.codex-plugin/`.

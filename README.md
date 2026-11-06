@@ -22,7 +22,7 @@ You need:
 
 ### Any agent (recommended)
 
-The [`plugins` CLI](https://www.npmjs.com/package/plugins) detects the coding agents on your machine, including Claude Code, Cursor, and Codex, and installs the plugin into each of them:
+The [plugins CLI](https://www.npmjs.com/package/plugins) detects the coding agents on your machine, including Claude Code, Cursor, and Codex, and installs the plugin into each of them:
 
 ```bash
 npx plugins add snowplow/skills
