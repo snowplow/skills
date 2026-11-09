@@ -7,12 +7,12 @@ npm create vite@latest . -- --template vanilla-ts
 npm install
 ```
 
-Replace the template's `src/main.ts` with a small shop:
+Replace the template's `src/main.ts` with a small e-shop:
 
 - Three views behind a hash router: `#/` lists three hardcoded products with an "Add to cart" button each, `#/cart` shows the cart with a "Checkout" button, `#/done` thanks the user.
 - A `src/tracking.ts` module imported once from `src/main.ts`, empty for now. Stage 4 initialises the tracker there, with the collector host and app ID as constants.
 - `git init`, add `.env` to `.gitignore`.
 
-`npm run dev` serves it on `http://localhost:5173`. The three clicks that matter are: add a product, open the cart, check out. Stage 2 designs for them. Stage 4 wires `trackAddToCartSpec` with a `createProduct` entity into "Add to cart", and `trackCheckoutCompletedSpec` with a `createOrder` entity and the cart's products into "Checkout".
+`npm run dev` serves it on the URL it prints, `http://localhost:5173` unless that port is taken. The three clicks that matter are: add a product, open the cart, check out. Stage 2 designs for them. Stage 4 wires `trackAddToCartSpec` with a `createProduct` entity into "Add to cart", and `trackCheckoutCompletedSpec` with a `createOrder` entity and the cart's products into "Checkout".
 
-Done when `npm run build` passes and `npm run dev` answers on `http://localhost:5173`.
+Done when `npm run build` passes and `npm run dev` answers on the URL it prints.
