@@ -27,7 +27,7 @@ Offer the guided setup, start it only if the user says yes.
 
 ## Rules
 
-1. Decide, do not ask. After the start question, trial or existing customer, pipeline, Micro, target app, vendor, what to track and how to design it all come from the MCP and the repo. State each decision in one line as you go and list them in the final summary, so the user can redirect. Wait for the user only where the agent cannot act: the browser login in Stage 4, the app actions in Stage 5 when the agent cannot drive the app, and the warehouse connection in Stage 6. Show the design and wait only when the user explicitly asked to review before changes.
+1. Decide, do not ask. After the start question, trial or existing customer, pipeline, Micro, target app, vendor, what to track and how to design it all come from the MCP and the repo. State each decision in one line as you go and list them in the final summary, so the user can redirect. Wait for the user only where the agent cannot act: the browser login in Stage 4, the app actions in Stage 5 when the agent cannot drive the app, the warehouse connection in Stage 6, and the acceptance of the design before Promote for an existing customer. Show the design and wait only when the user explicitly asked to review before changes.
 2. Stop early when nothing downstream can work: the MCP is not authenticated, no pipeline is `ready`, or `list_micros` is empty. Say what to do and end.
 3. Credentials stay in a gitignored `.env` and never reach the model: do not ask for them, read them or print them.
 4. Every path in this skill is relative to the project root, which Stage 1 sets. After each stage, update `docs/snowplow-onboarding.md` (template at the end). On entry, look for it in `docs/`, then in `snowplow-demo/docs/`: the directory that holds it is the project root. Resume from the first stage that is not done.
@@ -35,15 +35,17 @@ Offer the guided setup, start it only if the user says yes.
 
 ## Stages
 
+Trial and existing customer differ in one step, Promote in `references/console-setup.md`, which moves the schemas to PROD and publishes the plan: a trial runs it in Stage 3, an existing customer in Stage 6, after the Micro run and once the user has accepted the design.
+
 | # | Stage | Done when | Detail |
 |---|---|---|---|
 | 1 | Inventory | Trial or existing customer, project root, pipeline id, collector host, Micro endpoint, vendor, target app and platform recorded | `references/inventory.md` |
 | 1b | Demo app | Only when Stage 1 found no app: the demo shop runs locally | `references/demo-app.md` |
 | 2 | Design | A JSON Schema per entity and event in the progress file | `references/design.md` |
-| 3 | Create in Console | Trial: every schema in PROD, every event spec `published`. Existing customer: every schema in DEV, every spec created | `references/console-setup.md` |
+| 3 | Create in Console | Every schema, the source app, the plan and its specs created, ids recorded. Trial: Promote done | `references/console-setup.md` |
 | 4 | Instrument | Tracker initialised, Snowtype code generated and wired, app builds | `references/instrumentation.md` |
 | 5 | Verify | Every spec seen in Micro as a good event, no bad events for the app | `references/verify.md` |
-| 6 | Destination | `list_destinations` shows an active warehouse or lake, tracker on the pipeline collector, one round of events sent | `references/destination.md` |
+| 6 | Destination | `list_destinations` shows an active warehouse or lake, Promote done, tracker on the pipeline collector, one round of events sent | `references/destination.md` |
 | 7 | Query | Generated view in the warehouse, three questions answered, one insight stated | `references/query.md` |
 
 ## Stage 1: Inventory
@@ -60,7 +62,7 @@ Follow `references/design.md`. The result of this step is a JSON Schema per enti
 
 ## Stage 3: Create in Console
 
-Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created and published in Console, with their ids in the progress file.
+Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created in Console, with their ids in the progress file, and Promote done on a trial.
 
 ## Stage 4: Instrument
 
@@ -72,7 +74,7 @@ Follow `references/verify.md`. The result of this step is every event specificat
 
 ## Stage 6: Destination
 
-Follow `references/destination.md`. The result of this step is an active warehouse or lake destination with the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse.
+Follow `references/destination.md`. The result of this step is an active warehouse or lake destination, Promote done for an existing customer once the user accepted the design, the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse.
 
 ## Stage 7: Query
 

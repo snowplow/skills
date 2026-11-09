@@ -3,6 +3,7 @@
 Goals of this step:
 
 - An active destination, so the pipeline loads events into the user's own warehouse or lake.
+- For an existing customer, the user's acceptance of the design, then Promote from `references/console-setup.md`.
 - The tracker pointed at the pipeline collector instead of the Micro.
 - One round of events sent, so Stage 7 has data to query.
 
@@ -19,7 +20,7 @@ What they need ready. Snowflake: account URL, region, a loader user with key pai
 
 When a warehouse MCP is connected, run the setup SQL from the destination page through it and report what was created. The Console step still belongs to the user.
 
-When `list_connections` shows a connection labelled loader that is ready but no destination uses it, the agent creates the destination itself: `create_destination` with the pipeline id, the connection id, the destination type matching the connection, and `failedEventsLoader: false` for enriched events. Once the destination is active, only events sent after that get loaded, so then switch the tracker's collector host to the pipeline collector from Stage 1 and trigger the actions once more, the same way as in Stage 5, so Stage 7 has data. An existing customer stays on the Micro until the schemas reach PROD. `get_destination` gives database, schema and the events table for Stage 7.
+When `list_connections` shows a connection labelled loader that is ready but no destination uses it, the agent creates the destination itself: `create_destination` with the pipeline id, the connection id, the destination type matching the connection, and `failedEventsLoader: false` for enriched events. Once the destination is active, only events sent after that get loaded, so then switch the tracker's collector host to the pipeline collector from Stage 1 and trigger the actions once more, the same way as in Stage 5, so Stage 7 has data. An existing customer first gets a summary of what the Micro validated in Stage 5, and the switch waits until they accept the design and Promote from `references/console-setup.md` has run. `get_destination` gives database, schema and the events table for Stage 7.
 
 ## Docs
 

@@ -37,7 +37,7 @@ Install and initialisation details come from the Docs column.
 
 ## Initialise the tracker
 
-Once, where the app boots. The collector host and app ID go where the app keeps its other settings, and as constants next to the tracker init when it has none, never in `.env`, which holds the Console API key. Point it at the Micro endpoint. Stage 6 switches it to the pipeline collector once a destination is active, an existing customer stays on the Micro until the schemas are in PROD. Web example:
+Once, where the app boots. The collector host and app ID go where the app keeps its other settings, and as constants next to the tracker init when it has none, never in `.env`, which holds the Console API key. Point it at the Micro endpoint. Stage 6 switches it to the pipeline collector once a destination is active and, for an existing customer, the schemas are in PROD. Web example:
 
 ```typescript
 import { newTracker } from "@snowplow/browser-tracker";
