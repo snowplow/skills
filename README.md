@@ -8,7 +8,7 @@ npx plugins add snowplow/skills
 
 Then ask. "Design a tracking plan for the checkout flow, create the schemas in Console, add the tracker to this app, and send a test event for each." The agent designs the events and entities, creates the schemas, writes the tracking code, and reads the failed events if anything is wrong. It needs a Snowplow account: the [free trial](https://snowplow.io/get-started/snowplow-free-trial) or the [Signals free tier](https://signals.snowplow.io/start) is provisioned in about 20 minutes with no card and no infrastructure to run.
 
-This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) and six Snowplow skills. It installs into Claude Code, Cursor, or Codex. The docs page [Set up Snowplow with an AI assistant](https://docs.snowplow.io/docs/get-started/ai-assistant/) walks through the first session.
+This repository is a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle of the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) and Snowplow skills. It installs into Claude Code, Cursor, or Codex. The docs page [Set up Snowplow with an AI assistant](https://docs.snowplow.io/docs/get-started/ai-assistant/) walks through the first session.
 
 ## Install
 
@@ -43,6 +43,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
 - `tracking-design` — design event schemas, entities, and event specifications
 - `implementation-guidance` — instrument Snowplow trackers in applications
 - `signals` — manage real-time customer attributes, services, and interventions
+- `signals-setup` — set Signals up in a project, from tracking to the app fetching values
 - `pipeline-infrastructure` — collector, enrichment, pipeline metrics, mini pipelines
 - `console-operations` — pipelines, enrichments, tracking plans, alerts, source apps
 - `troubleshooting` — diagnose failed events, schema errors, enrichment problems
@@ -62,7 +63,7 @@ The first time you use a Snowplow MCP tool, a browser window opens to authentica
         ├── .plugin/
         │   └── plugin.json       # open-plugin manifest
         ├── .mcp.json             # Snowplow MCP server (shared)
-        └── skills/               # six bundled SKILL.md files (shared)
+        └── skills/               # seven bundled SKILL.md files (shared)
 ```
 
 Two manifest formats coexist so the repo works as both a native Claude Code marketplace and a vendor-neutral [open-plugin](https://github.com/vercel-labs/plugins) bundle:
