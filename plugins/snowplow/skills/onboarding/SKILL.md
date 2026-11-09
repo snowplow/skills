@@ -30,14 +30,14 @@ Offer the guided setup, start it only if the user says yes.
 1. Decide, do not ask. After the start question, trial or existing customer, pipeline, Micro, target app, vendor, what to track and how to design it all come from the MCP and the repo. State each decision in one line as you go and list them in the final summary, so the user can redirect. Wait for the user only where the agent cannot act: the browser login in Stage 4, the app actions in Stage 5 when the agent cannot drive the app, and the warehouse connection in Stage 6. Show the design and wait only when the user explicitly asked to review before changes.
 2. Stop early when nothing downstream can work: the MCP is not authenticated, no pipeline is `ready`, or `list_micros` is empty. Say what to do and end.
 3. Credentials stay in a gitignored `.env` and never reach the model: do not ask for them, read them or print them.
-4. After each stage, update `docs/snowplow-onboarding.md` (template at the end). On entry, read it and resume from the first stage that is not done.
+4. Every path in this skill is relative to the project root, which Stage 1 sets. After each stage, update `docs/snowplow-onboarding.md` (template at the end). On entry, look for it in `docs/`, then in `snowplow-demo/docs/`: the directory that holds it is the project root. Resume from the first stage that is not done.
 5. Tool names below are Snowplow MCP tools.
 
 ## Stages
 
 | # | Stage | Done when | Detail |
 |---|---|---|---|
-| 1 | Inventory | Trial or existing customer, pipeline id, collector host, Micro endpoint, vendor, target app and platform recorded | `references/inventory.md` |
+| 1 | Inventory | Trial or existing customer, project root, pipeline id, collector host, Micro endpoint, vendor, target app and platform recorded | `references/inventory.md` |
 | 1b | Demo app | Only when Stage 1 found no app: the demo shop runs locally | `references/demo-app.md` |
 | 2 | Design | A JSON Schema per entity and event in the progress file | `references/design.md` |
 | 3 | Create in Console | Trial: every schema in PROD, every event spec `published`. Existing customer: every schema in DEV, every spec created | `references/console-setup.md` |
@@ -48,11 +48,11 @@ Offer the guided setup, start it only if the user says yes.
 
 ## Stage 1: Inventory
 
-Follow `references/inventory.md`. The result of this step is trial or existing customer decided, and the pipeline, collector host, Micro, vendor, target app and platform recorded in the progress file.
+Follow `references/inventory.md`. The result of this step is trial or existing customer decided, and the project root, pipeline, collector host, Micro, vendor, target app and platform recorded in the progress file.
 
 ## Stage 1b: Demo app
 
-Only when Stage 1 found no app. Follow `references/demo-app.md`. The result of this step is a demo shop in a new `snowplow-demo` directory, running locally and recorded as the target app.
+Only when Stage 1 found no app. Follow `references/demo-app.md`. The result of this step is a demo shop in the project root, running locally and recorded as the target app.
 
 ## Stage 2: Design
 
