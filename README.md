@@ -89,8 +89,6 @@ The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api
 
 ### Skills
 
-You don't need to call a skill by name. The agent loads the matching skill when your request needs it.
-
 | Skill | What it does |
 | --- | --- |
 | [`tracking-design`](plugins/snowplow/skills/tracking-design/SKILL.md) | Designs event and entity schemas, event specifications, and tracking plans, and creates them in Console once you approve the design |
