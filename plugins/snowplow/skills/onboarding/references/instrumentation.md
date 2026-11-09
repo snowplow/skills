@@ -101,7 +101,6 @@ Like direct tracker calls, they carry no `event_specification` entity.
 
 - [All trackers](https://docs.snowplow.io/docs/sources.md)
 - [Web tracker quick start](https://docs.snowplow.io/docs/sources/web-trackers/quick-start-guide.md)
-- [Cookies and ad blockers](https://docs.snowplow.io/docs/get-started/tracking/cookies-and-ad-blockers.md)
 - [Install Snowtype](https://docs.snowplow.io/docs/event-studio/implement-tracking/install-snowtype.md)
 - [Snowtype configuration reference, supported trackers](https://docs.snowplow.io/docs/event-studio/implement-tracking/configuration-reference.md)
 - [Generated code](https://docs.snowplow.io/docs/event-studio/implement-tracking/generate-tracking-code.md)
