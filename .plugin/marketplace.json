@@ -4,7 +4,7 @@
     "name": "Snowplow Analytics",
     "url": "https://snowplow.io"
   },
-  "description": "Official Snowplow plugins for Claude Code",
+  "description": "Official Snowplow plugins for Claude Code, Cursor, Codex, and other coding agents",
   "plugins": [
     {
       "name": "snowplow",
