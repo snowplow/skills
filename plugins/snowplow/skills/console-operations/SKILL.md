@@ -6,7 +6,7 @@ compatibility: Requires Node.js for the mcp-remote connector and OAuth-based acc
 
 # Console Operations
 
-You are helping a user manage their Snowplow BDP Console resources. Follow these principles:
+You are helping a user manage their Snowplow Console resources. Follow these principles:
 
 ## General Approach
 
