@@ -1,6 +1,6 @@
 ---
 name: signals
-description: "Manage Snowplow Signals - attribute keys, attribute groups, services, interventions, Agentic Context, and publishing. Use when users want to configure real-time customer attributes, create services for pull-based access, set up interventions for push-based actions, or set up Agentic Context to feed recent session events to AI agents. Use this skill for any real-time customer-attribute, personalisation, or activation question, even if the user does not name Signals. Triggers: customer attributes, feature store, real-time scoring, intervention, attribute group, personalisation, agentic context, agent context."
+description: "Manage Snowplow Signals - attribute keys, attribute groups, services, interventions, Agentic Context, and publishing. Use when users want to configure real-time customer attributes, create services for pull-based access, set up interventions for push-based actions, or set up Agentic Context to feed recent session events to AI agents. Use this skill for any real-time customer-attribute, personalisation, or activation question, even if the user does not name Signals. For first-time setup in the user's own codebase, use signals-setup. Triggers: customer attributes, feature store, real-time scoring, intervention, attribute group, personalisation, agentic context, agent context."
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 

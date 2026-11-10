@@ -97,6 +97,7 @@ The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api
 | [`pipeline-infrastructure`](plugins/snowplow/skills/pipeline-infrastructure/SKILL.md) | Inspects pipelines, collector configuration, enrichments, and health metrics, plus mini pipelines and Micro instances, without changing anything |
 | [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
 | [`signals`](plugins/snowplow/skills/signals/SKILL.md) | Manages Signals attribute keys, attribute groups, services, interventions, and Agentic Context, and publishes them |
+| [`signals-setup`](plugins/snowplow/skills/signals-setup/SKILL.md) | Sets Signals up in your project: adds tracking, creates and publishes an attribute group and a service, and wires your app to fetch the values |
 
 ## Get help
 
