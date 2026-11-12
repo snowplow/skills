@@ -48,8 +48,7 @@ With schemas in DEV, use a **Snowplow Micro** instance to validate events before
 1. Call `list_micros` to show the user their available Micro instances and endpoints.
 2. Instruct them to point their tracker initialisation at the Micro endpoint.
 3. Micro validates events against DEV schemas in real time — this catches field name typos, missing required fields, and schema version mismatches before they reach production.
-
-**Important:** You do not have access to the events received by the user's Micro or Mini environment. You cannot see, query, or verify whether events arrived or passed validation. The user must check their Micro UI or API directly (e.g. `http://<micro-endpoint>/micro/good` and `/micro/bad`) to review results.
+4. Call `list_micro_events` to confirm events arrived and to read why any failed, and `get_micro_event` to see one event in full. The user can watch events live at `<micro-endpoint>/micro/ui`.
 
 ### Stage 4: Validate in DEV Pipeline
 
@@ -110,5 +109,7 @@ Always fetch the docs rather than generating tracker code from memory.
 - `list_source_apps` — check for a source app matching the platform
 - `list_pipelines` — find DEV/PROD collector endpoints
 - `list_micros` — show available Micro instances and endpoints for testing
+- `list_micro_events` — events a Micro received, good or bad, filtered by app ID or event name
+- `get_micro_event` — one Micro event with every column
 - `fetch_documentation_index` — get the Snowplow documentation sitemap
 - `fetch_documentation_page` — fetch up-to-date tracker reference pages

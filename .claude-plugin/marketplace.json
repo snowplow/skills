@@ -9,7 +9,7 @@
     {
       "name": "snowplow",
       "source": "./plugins/snowplow",
-      "description": "Snowplow skills bundled with the Snowplow MCP server for tracking design, pipeline operations, Signals, and troubleshooting."
+      "description": "Snowplow skills bundled with the Snowplow MCP server for guided onboarding, tracking design, pipeline operations, Signals, and troubleshooting."
     }
   ]
 }
