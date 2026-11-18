@@ -40,7 +40,7 @@ The manifests are kept in sync by hand. When you change plugin metadata, such as
 
 - Update both `plugins/snowplow/.claude-plugin/plugin.json` and `plugins/snowplow/.plugin/plugin.json`.
 - Update both `.claude-plugin/marketplace.json` and `.plugin/marketplace.json` if the change affects the catalog entry.
-- Bump `version` in both `plugin.json` files when you release a change. Claude Code keeps marketplace users on their cached copy until `version` changes, so a change released without a bump doesn't reach them.
+- Bump `version` in `plugins/snowplow/.plugin/plugin.json` when you release a change. Leave `version` out of `plugins/snowplow/.claude-plugin/plugin.json`: Claude Code updates an installed plugin only when its version string changes, and with no version it tracks commits instead, so every merge to `main` reaches existing Claude Code installs without a bump.
 
 To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table in the [README](README.md).
 
