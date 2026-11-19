@@ -65,7 +65,7 @@ Node 18 or newer. Write `snowtype.config.json` at the app root with this content
 }
 ```
 
-Then run `npx @snowplow/snowtype@latest generate`.
+Then run `npx @snowplow/snowtype@latest generate`. If it stops with "Required API key credentials not detected" although `snowplow-cli status` passed with `auth=api-key`, the key is in the global Snowplow CLI configuration, which Snowtype does not read: run `npx @snowplow/snowtype@latest login`, or follow the `snowplow-cli setup --dotenv` fork above.
 
 Output: one source file with a `create<Entity>` function per entity and a `track<Spec>Spec` function per event spec in TypeScript and JavaScript, `to<Spec>Spec()` extension functions on the generated event types in Swift and Kotlin, and `.snowtype-lock.json` pinning the spec versions. Commit all of it. After the plan changes run `npx @snowplow/snowtype@latest update --yes` then `generate` again. `update --latestDraft` picks up draft specs, which is what an existing customer at DEV needs. Snowtype does not install the tracker and cannot generate for template plans.
 
