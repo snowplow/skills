@@ -22,7 +22,7 @@ The pipeline validates against PROD schemas and published specs only. `promote_d
 
 ## Git-managed resources
 
-`snowplow-cli` manages data structures and tracking plans from a git repository, GitOps style. Resources managed that way are locked in Console, which is why some write tools refuse them. The CLI docs below cover it if the organization uses it or user asks about it.
+`snowplow-cli` manages data structures and tracking plans from a git repository, GitOps style. Resources managed that way are locked in Console, which is why some write tools refuse them. The CLI docs below cover it if the organization uses it or user asks about it. Never publish resources managed that way yourself, not even to DEV: no `snowplow-cli ds publish`, no `snowplow-cli dp sync`. The change goes into the repository's files, and the user merges it so the repository's CI/CD publishes it.
 
 ## Docs
 
