@@ -25,7 +25,7 @@ Snowplow tracking implementation follows this lifecycle. Walk the user through e
    - Use `get_schema_properties` to get exact field names, types, and requirements
    - Use `list_source_apps` to check if they have a source app for their platform
 
-3. Implement the events with Snowtype (see **Snowtype** below). Write tracker calls by hand only when Snowtype does not support their tracker and language, or the user asks for hand-written code; then fetch the latest tracker reference for their platform (see **Tracker Reference** below).
+3. Implement the events with Snowtype (see **Snowtype and Snowplow CLI** below). Write tracker calls by hand only when Snowtype does not support their tracker and language, or the user asks for hand-written code; then fetch the latest tracker reference for their platform (see **Tracker Reference** below).
 
 4. Whichever way the code is produced, make sure it includes:
    - Tracker initialisation pointing at their **Micro endpoint** for testing or **Mini endpoint** if they don't have a Micro instance (see Stage 2)
@@ -71,7 +71,9 @@ Before going live:
 
 ---
 
-## Snowtype
+## Snowtype and Snowplow CLI
+
+Snowplow CLI manages the tracking definitions as files: it validates them, publishes them to Console and sends test events. Snowtype generates the tracking code from those definitions. Each command below names the tool it belongs to.
 
 Snowtype generates type-safe tracking functions from the user's event specifications and data structures, for the tracker and language set in its configuration. It is the recommended way to implement tracking whenever it supports the user's tracker and language: https://docs.snowplow.io/docs/event-studio/implement-tracking/configuration-reference/#supported-trackers-and-languages. The tracker itself is still set up from the tracker reference.
 
