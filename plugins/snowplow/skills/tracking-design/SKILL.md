@@ -103,8 +103,8 @@ When the repository holds tracking definition files, or Console shows the defini
 When following the as code way:
 
 - Write the definitions as files in the repository instead of creating them in Console. The design phases above still apply.
-- Before proposing any Snowplow CLI or Snowtype command, fetch the tutorial `/tutorials/tracking-as-code.md` with `fetch_documentation_page` and take every command and flag from it, not from memory. If that path no longer exists, find the tutorial with `fetch_documentation_index`.
-- Do not publish the definitions to Console yourself; the repository's CI/CD publishes them once the user merges the change.
+- Before proposing a Snowplow CLI or Snowtype command for the definition files, their checks or the CI/CD that publishes them, fetch the tutorial `/tutorials/tracking-as-code.md` with `fetch_documentation_page` and take every command and flag from it, not from memory. If that path no longer exists, find the tutorial with `fetch_documentation_index`. For other commands, such as `login`, `status`, `events send` or `setup`, use the reference pages the implementation-guidance skill points to, never memory.
+- Don't publish the definitions to Console yourself. Tell the user to merge the change so the repository's CI/CD publishes it; you can read its workflows to tell them which merge publishes to development and which to production. If the user asks you to publish without going through CI/CD, first warn them that it can break the checks or leave the repository and Console out of sync, change how the events already being sent are validated, and overwrite changes from other people on the team. Publish only after they approve it explicitly.
 - For Snowtype generating code from those files, load the implementation-guidance skill.
 
 Comparison of the two ways: https://docs.snowplow.io/docs/event-studio/implement-tracking/#compare-tracking-from-console-and-as-code and https://docs.snowplow.io/docs/event-studio/implement-tracking/#decide-when-to-manage-tracking-as-code. Tutorial: https://docs.snowplow.io/tutorials/tracking-as-code/introduction
@@ -206,4 +206,4 @@ If a user says "data product", interpret it as "tracking plan" — same concept,
 - `list_source_apps` — source applications linked to tracking plans
 - `get_source_app` — source app details and the entities it provides
 - `fetch_documentation_index` — find the tracking as code tutorial when its path has changed
-- `fetch_documentation_page` — fetch the tracking as code tutorial before proposing Snowplow CLI or Snowtype commands
+- `fetch_documentation_page` — fetch the tracking as code tutorial before proposing Snowplow CLI or Snowtype commands for the definition files, their checks or CI/CD
