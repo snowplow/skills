@@ -66,7 +66,7 @@ Follow `references/console-setup.md`. The result of this step is every schema, t
 
 ## Stage 4: Instrument
 
-Follow `references/instrumentation.md`. The result of this step is the implementation decided, Snowtype or direct tracker calls, and the tracking code integrated into the application, which builds and runs. When the tracking definitions are managed as code, generate the code with Snowtype from the local tracking plans as the implementation-guidance skill describes.
+Follow `references/instrumentation.md`. The result of this step is the implementation decided, Snowtype or direct tracker calls, and the tracking code integrated into the application, which builds and runs. When the tracking definitions are managed as code and Snowtype supports the platform, generate the code with Snowtype from the local tracking plans as the implementation-guidance skill describes; other platforms call the tracker directly, as `references/instrumentation.md` describes.
 
 ## Stage 5: Verify
 
