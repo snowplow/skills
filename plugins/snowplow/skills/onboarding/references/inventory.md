@@ -9,6 +9,7 @@ The output of this stage is one row in the progress file with these fields:
 - Project root: the directory every later path is relative to.
 - Target app: platform, framework, boot file, run command, and the app ID and collector when a tracker is already configured, blank otherwise.
 - Existing Console objects to reuse: a source app for the target app, a tracking plan for it, a destination, each when present.
+- Tracking definitions: managed from Console or as code, decided as the tracking-design skill describes, before Stage 3 creates anything.
 
 Customer. `get_organization`: `Organization type: trial` means trial, any other type means existing.
 

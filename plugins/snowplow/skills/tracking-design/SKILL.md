@@ -26,6 +26,7 @@ It is important you never create schemas or event specifications without explici
 - Understand the customer's current tracking setup
 - If the user references a Console data-structure URL (`/data-structures/<hash>`), resolve it with get_data_structure_by_hash to identify which schema they mean.
 - Search Iglu Central for relevant public schemas for common use cases
+- Decide whether the definitions are managed from Console or as code (see **Two Ways to Manage Tracking** below) before you create anything
 
 ### Phase 2: Intent Gathering
 
@@ -70,6 +71,8 @@ Never proceed with creation without confirmation.
 
 ### Phase 6: Execution
 
+When following the as code way (see **Two Ways to Manage Tracking** below), write these definitions as files in the repository instead of making the calls below.
+
 Execute API calls in the correct order:
 
 1. Create any new schema versions needed (both event and entity schemas)
@@ -78,6 +81,33 @@ Execute API calls in the correct order:
 4. Confirm completion with all Iglu URIs created
 
 Note: Event specifications include both the event schema and all entity schemas (tracked and enriched) in a single API call. There is no separate "add entity" step.
+
+## Two Ways to Manage Tracking
+
+A customer manages tracking definitions (data structures, tracking plans and event specifications) in one of two ways:
+
+- **From Console**: the definitions live in the Snowplow account, edited in Console or with the tools in this skill, and the tracking code is written by hand, copied from the Console code snippets, or generated with Snowtype.
+- **As code**: the definitions are files in the application's repository, Snowtype generates the tracking code from them, Snowplow CLI checks each change in pull requests, and the repository's CI/CD publishes them to Console.
+
+Before creating any data structure, tracking plan or event specification, infer the way from what you can observe, in this order. The first point that settles it decides:
+
+1. Where the existing definitions live: tracking definition files in the repository, or data structures, tracking plans or source applications that Console shows as locked or managed from a repository (`list_schemas` marks them `(locked)`; `get_tracking_plan` and `get_source_app` show their lock status).
+2. Whether you work inside a repository with a shell that can run Snowplow CLI and Snowtype.
+3. Whether the person asking is a developer, or a product, analytics or business user.
+4. Whether several people commit to the repository, whether it builds in CI, and whether changes go through pull requests.
+
+Do not stop to ask which way to follow. Say in one sentence which way you follow and why, mention the other way, and add that a customer can start from Console and move the tracking plan to a repository later: https://docs.snowplow.io/docs/event-studio/implement-tracking/#move-a-tracking-plan-to-your-repository
+
+When the repository holds tracking definition files, or Console shows the definitions as locked or managed from a repository, follow the as code way and do not change those definitions in Console. When you cannot reach that repository, describe the file change for the user to make there.
+
+When following the as code way:
+
+- Write the definitions as files in the repository instead of creating them in Console. The design phases above still apply.
+- Before proposing any Snowplow CLI or Snowtype command, fetch the tutorial `/tutorials/tracking-as-code.md` with `fetch_documentation_page` and take every command and flag from it, not from memory. If that path no longer exists, find the tutorial with `fetch_documentation_index`.
+- Do not publish the definitions to Console yourself; the repository's CI/CD publishes them once the user merges the change.
+- For Snowtype generating code from those files, load the implementation-guidance skill.
+
+Comparison of the two ways: https://docs.snowplow.io/docs/event-studio/implement-tracking/#compare-tracking-from-console-and-as-code and https://docs.snowplow.io/docs/event-studio/implement-tracking/#decide-when-to-manage-tracking-as-code. Tutorial: https://docs.snowplow.io/tutorials/tracking-as-code/introduction
 
 ## Source Application Entity Inheritance
 
@@ -175,3 +205,5 @@ If a user says "data product", interpret it as "tracking plan" — same concept,
 - `search_data_catalog` — search the catalog by name, vendor, or description
 - `list_source_apps` — source applications linked to tracking plans
 - `get_source_app` — source app details and the entities it provides
+- `fetch_documentation_index` — find the tracking as code tutorial when its path has changed
+- `fetch_documentation_page` — fetch the tracking as code tutorial before proposing Snowplow CLI or Snowtype commands
