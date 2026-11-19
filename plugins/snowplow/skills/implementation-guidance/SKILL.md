@@ -84,6 +84,7 @@ For installation, configuration and commands, use `fetch_documentation_index` to
 - `npx snowtype login` and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one. Logging out of either logs out of both.
 - An API key takes precedence over the login in both tools. Use an API key where nobody can sign in, such as CI.
 - `snowplow-cli status` shows which one is in use: `auth=login` or `auth=api-key`.
+- Never ask the user to paste a key, token or secret into the conversation, never read, print or search `.env` or the saved login, and never put a key on a command line. Let the tools read their own credentials, and check them only with `snowplow-cli status`, which shows the key id but never the key.
 
 Details: https://docs.snowplow.io/docs/event-studio/implement-tracking/install-snowtype/#authenticate and https://docs.snowplow.io/docs/api-reference/snowplow-cli/#configure
 
