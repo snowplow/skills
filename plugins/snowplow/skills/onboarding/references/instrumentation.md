@@ -9,13 +9,13 @@ Then credentials (Snowtype only), tracker, generated code, wiring. Run every com
 
 ## Credentials
 
-Snowtype only. It needs a Console API key and key ID to read the event specs. Sending events with the CLI does not. `snowplow-cli` below means `npx @snowplow/snowplow-cli`, or the binary when one is installed.
+Snowtype only. It reads the event specs with a browser login or a Console API key. Sending events with the CLI needs neither. `snowplow-cli` below means `npx @snowplow/snowplow-cli`, or the binary when one is installed.
 
-1. `snowplow-cli status`. If it passes and its `org_id` equals the id from `get_organization`, skip to the tracker.
-2. Otherwise `snowplow-cli setup --dotenv`. It opens the browser for a device login, finds the organization, creates an API key, and writes `SNOWPLOW_CONSOLE_API_KEY`, `SNOWPLOW_CONSOLE_API_KEY_ID` and `SNOWPLOW_CONSOLE_ORG_ID` to `./.env`. The user completes the login. When the account has access to several organizations the CLI asks which one to use: pick the one whose id equals the id from `get_organization`, and ask the user when none matches. If the session cannot open a browser, ask them to run the command themselves. Snowtype reads the same `.env`.
-3. Add `.env` to `.gitignore` if missing, run `snowplow-cli status` again, check the org id.
+1. `snowplow-cli status`. If it passes and its `org_id` equals the id from `get_organization`, skip to the tracker. It also shows `auth=login` or `auth=api-key`: an API key, when one is configured, takes precedence over the login.
+2. Otherwise `snowplow-cli login`. It opens the browser and saves one login that Snowtype shares, so `npx snowtype login` does the same. The user completes the login. When the account has access to several organizations the CLI asks which one to use: pick the one whose id equals the id from `get_organization`, and ask the user when none matches. If the session cannot open a browser, ask them to run the command themselves.
+3. Run `snowplow-cli status` again, check the org id.
 
-Forks. SSO organization, device login fails: the user creates the key in Console (Settings → Manage organization → API keys) and writes the three variables into `.env` themselves. A global CLI config for another organization exists: the project `.env` takes precedence, nothing else to do. Use `--read-only` only when the key serves Snowtype alone.
+Forks. SSO organization, device login fails: the user creates the key in Console (Settings → Manage organization → API keys) and writes `SNOWPLOW_CONSOLE_API_KEY`, `SNOWPLOW_CONSOLE_API_KEY_ID` and `SNOWPLOW_CONSOLE_ORG_ID` into `./.env` themselves. A global CLI config for another organization exists: `snowplow-cli setup --dotenv` creates an API key for this organization and writes it to `./.env`, which takes precedence; use `--read-only` only when the key serves Snowtype alone. In both forks, add `.env` to `.gitignore` if missing; Snowtype reads the same `.env`. CI, where nobody can log in, uses an API key.
 
 ## Platform table
 

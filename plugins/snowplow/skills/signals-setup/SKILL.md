@@ -108,7 +108,7 @@ Skip any step the status check showed as done. After each create, update, or pub
 - Start the app (or ask the user to) and trigger the events.
 - Call get_pipeline_metrics for the Signals pipeline and look for the `app_id`. Metrics can lag by a few minutes; if nothing shows yet, move on and check again in Phase 5.
 
-**Tracking as files**: if the project has `./data-products/` or `./data-structures/`, the user manages tracking with snowplow-cli. Run `snowplow-cli status`; if it passes, make the tracking changes in those files and apply them with `snowplow-cli dp sync` and `ds publish dev`. `ds publish prod` needs the same approval as promote_data_structure. If it fails, ask the user to run `snowplow-cli setup`, or use the MCP tools instead.
+**Tracking as files**: if the project has `./data-products/` or `./data-structures/`, the user manages tracking as code with snowplow-cli, and the repository's CI/CD publishes those files to Console. Make the schema, source app and tracking plan changes in those files instead of with create_schema_version, promote_data_structure, create_source_app, create_tracking_plan, edit_tracking_plan or create_event_specification. Never publish them yourself, not even to development: no `snowplow-cli ds publish` and no `snowplow-cli dp sync`. Tell the user to merge the change so their pipeline publishes it. Until then, events that need a new schema fail validation, so Step 1 stays not done and the merge goes into the "Before you deploy" list in Phase 5.
 
 #### Step 2: Attribute Groups
 
