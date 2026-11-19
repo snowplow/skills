@@ -38,7 +38,7 @@ Snowplow tracking implementation follows this lifecycle. Walk the user through e
 Before testing with Micro, schemas must be in the **DEV** environment — Micro uses DEV schemas to validate events.
 
 1. Use `list_schemas` to check the deployment status of all schemas used by the implementation.
-2. Check the deployment environment field on each schema, confirming DEV is present before testing with Micro. If not, the schema needs to be deployed to DEV first (via the Console or `create_schema_version`). A schema defined in the repository's files, or one that Console shows as locked, is managed from a repository: it reaches DEV through that repository's CI/CD (see **Important Notes**).
+2. Check the deployment environment field on each schema, confirming DEV is present before testing with Micro. If not, the schema needs to be deployed to DEV first (via the Console or `create_schema_version`). A schema defined in the repository's files, or one that Console shows as locked, is managed as code in a repository, so don't publish it to Console yourself. Edit the files and tell the user to merge the change so the repository's CI/CD publishes it; you can read its workflows to tell them which merge publishes to development and which to production. If the user asks you to publish without going through CI/CD, first warn them that it can break the checks or leave the repository and Console out of sync, change how the events already being sent are validated, and overwrite changes from other people on the team. Publish only after they approve it explicitly.
 3. Only proceed to Stage 3 once all schemas are confirmed in DEV.
 
 ### Stage 3: Test with Micro
@@ -79,12 +79,14 @@ Snowtype generates type-safe tracking functions from the user's event specificat
 
 For installation, configuration and commands, use `fetch_documentation_index` to find the Snowtype pages (under `/docs/event-studio/implement-tracking/`) and fetch them with `fetch_documentation_page`, rather than writing them from memory.
 
+Minimum versions: Snowplow CLI 0.5.0 for `login` and the `auth=` field of `status`, 0.4.0 for `dp validate offline` and declared event specification versions; Snowtype 0.21.0 for `login`, 0.20.0 for `check` and `localDataProducts`. Check the installed versions with `snowplow-cli --version` and, in the project, `npx snowtype --version`, and upgrade when one is older. `npx @snowplow/snowtype@latest` always runs the latest Snowtype.
+
 ### Authentication
 
-- `npx snowtype login` and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one. Logging out of either logs out of both.
+- `npx snowtype login` (with Snowtype installed in the project, otherwise `npx @snowplow/snowtype@latest login`) and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one. Logging out of either logs out of both.
 - An API key takes precedence over the login in both tools. Use an API key where nobody can sign in, such as CI.
 - `snowplow-cli status` shows which one is in use: `auth=login` or `auth=api-key`.
-- Never ask the user to paste a key, token or secret into the conversation, never read, print or search `.env` or the saved login, and never put a key on a command line. Let the tools read their own credentials, and check them only with `snowplow-cli status`, which shows the key id but never the key.
+- Never ask the user to paste a key, token or secret into the conversation, never read, print or search `.env` or the saved login, and never put a key on a command line. Let the tools read their own credentials. `snowplow-cli status` checks Snowplow CLI's credentials and shows the key id but never the key. Snowtype shares them only through the browser login, or when the key is in the environment or in the project's `./.env`: it does not read the global Snowplow CLI configuration.
 
 Details: https://docs.snowplow.io/docs/event-studio/implement-tracking/install-snowtype/#authenticate and https://docs.snowplow.io/docs/api-reference/snowplow-cli/#configure
 
@@ -151,7 +153,7 @@ Always fetch the docs rather than generating tracker code from memory.
 - If a field has property instructions in the event spec, include them as code comments
 - When showing entity contexts, note the cardinality (e.g. `// Required — must be attached` vs `// Optional`)
 - If the user's schema doesn't exist yet, suggest they create it first (point them to the tracking-design skill)
-- When data structures and tracking plans are managed as code in a repository (definition files in the repository, or resources that Console shows as locked), never publish them to Console yourself, not even to DEV: no `snowplow-cli ds publish`, no `snowplow-cli dp sync`, and no MCP tool that creates, promotes or publishes them. Edit the files, and tell the user to merge the change so the repository's CI/CD publishes it
+- When data structures and tracking plans are managed as code in a repository (definition files in the repository, or resources that Console shows as locked), don't publish them to Console yourself. Edit the files and tell the user to merge the change so the repository's CI/CD publishes it; you can read its workflows to tell them which merge publishes to development and which to production. If the user asks you to publish without going through CI/CD, first warn them that it can break the checks or leave the repository and Console out of sync, change how the events already being sent are validated, and overwrite changes from other people on the team. Publish only after they approve it explicitly.
 
 ## Tools
 
