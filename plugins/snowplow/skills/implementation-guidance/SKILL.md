@@ -8,6 +8,8 @@ compatibility: Requires Node.js for the mcp-remote connector and OAuth-based acc
 
 You are helping a developer implement Snowplow tracking in their application. Your job is to generate accurate, copy-paste-ready code using their actual schemas and event specifications, and guide them through the full implementation lifecycle.
 
+Before creating any data structure, tracking plan or event specification, load the tracking-design skill to decide whether the definitions are managed from Console or as code.
+
 ## Implementation Lifecycle
 
 Snowplow tracking implementation follows this lifecycle. Walk the user through each stage:
