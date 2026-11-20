@@ -36,13 +36,13 @@ The `.mcp.json` file and the `skills/` directory are shared by both formats, so 
 
 ## Make a change
 
-The manifests are kept in sync by hand. When you change plugin metadata, such as the description, version, or keywords:
+The manifests are kept in sync by hand. When you change plugin metadata, such as the description or keywords:
 
 - Update both `plugins/snowplow/.claude-plugin/plugin.json` and `plugins/snowplow/.plugin/plugin.json`.
 - Update both `.claude-plugin/marketplace.json` and `.plugin/marketplace.json` if the change affects the catalog entry.
-- Bump `version` in `plugins/snowplow/.plugin/plugin.json` when you release a change. Leave `version` out of `plugins/snowplow/.claude-plugin/plugin.json`: Claude Code updates an installed plugin only when its version string changes, and with no version it tracks commits instead, so every merge to `main` reaches existing Claude Code installs without a bump.
+- Bump `version` in `plugins/snowplow/.plugin/plugin.json` when you release a change. Leave `version` out of `plugins/snowplow/.claude-plugin/plugin.json` and out of the plugin entry in `.claude-plugin/marketplace.json`: Claude Code updates an installed plugin only when its version string changes, and with no version in either file it tracks commits instead. Existing Claude Code installs then pick up each merge to `main` on their next marketplace update, without a bump. Installs that the `plugins` CLI makes for other agents, such as Codex or VS Code, are local copies, so whatever the version says, they update only when the user runs `npx plugins add` again.
 
-To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table in the [README](README.md).
+To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table in the [README](README.md). The plugin descriptions in both `plugin.json` files and both `marketplace.json` files list the skill areas, so update all four if the new skill adds an area.
 
 ## Test locally
 
