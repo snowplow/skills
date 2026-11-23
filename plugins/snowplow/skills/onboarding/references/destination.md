@@ -14,7 +14,7 @@ The connection and the destination are created in Console, in one wizard at Dest
 - A browser automation tool is available: the user logs in to Console, then the agent drives the wizard, picks the pipeline and the warehouse type, and leaves the credential fields to the user, since credentials never reach the model.
 - No browser tool: ask the user to run the wizard, tell them what to prepare, and wait.
 
-Either way, poll `list_destinations` every few minutes until the destination is active. If the user has no warehouse, say so plainly: the Micro is the end of the trial path, and stop after Stage 5.
+Either way, poll `list_destinations` every few minutes until the destination is active. If the user has no warehouse, say so plainly: the Micro is the end of the trial path, and stop after Stage 5. Mark Stage 6 `TODO` in the progress file, with a note saying where to add the destination in Console, and Stage 7 `TODO`, waiting on Stage 6. Do the same when the user stops before the destination is active.
 
 What they need ready. Snowflake: account URL, region, a loader user with key pair authentication, role, warehouse, database. The Snowflake destination page provides the SQL. BigQuery: project and a service account with the documented roles. Databricks: host, catalog, token. Trial allows one warehouse or lake destination.
 
