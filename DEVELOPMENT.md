@@ -17,7 +17,9 @@ This page explains how the repository is laid out and how to test a change befor
 │       ├── .plugin/
 │       │   └── plugin.json       # open-plugin manifest
 │       ├── .mcp.json             # Snowplow MCP server (shared)
+│       ├── tools/                # filename-is-tool modules: <mcp_tool>.md
 │       └── skills/               # bundled SKILL.md files (shared)
+│           └── onboarding/resume.go  # single stdlib Go adapter; no build, no deps
 └── server.json                   # MCP Registry entry for the Snowplow MCP server
 ```
 
@@ -43,6 +45,8 @@ The manifests are kept in sync by hand. When you change plugin metadata, such as
 - Bump `version` in `plugins/snowplow/.plugin/plugin.json` when you release a change. Leave `version` out of `plugins/snowplow/.claude-plugin/plugin.json` and out of the plugin entry in `.claude-plugin/marketplace.json`: Claude Code updates an installed plugin only when its version string changes, and with no version in either file it tracks commits instead. Existing Claude Code installs then pick up each merge to `main` on their next marketplace update, without a bump. Installs that the `plugins` CLI makes for other agents, such as Codex or VS Code, are local copies, so whatever the version says, they update only when the user runs `npx plugins add` again.
 
 To add a skill, create `plugins/snowplow/skills/<skill-name>/SKILL.md` with `name` and `description` frontmatter, then add it to the skills table in the [README](README.md). The plugin descriptions in both `plugin.json` files and both `marketplace.json` files list the skill areas, so update all four if the new skill adds an area.
+To add a tool, add `plugins/snowplow/tools/<mcp_tool>.md` (filename = MCP tool name) and one row in the relevant `SKILL.md` stage table; no Go change or rebuild (`go run` compiles each call).
+Local Go check: `go vet plugins/snowplow/skills/onboarding/resume.go` and `go run plugins/snowplow/skills/onboarding/resume.go` from a test project containing `docs/snowplow-onboarding.md`.
 
 ## Test locally
 

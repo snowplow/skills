@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repository is
 
-A plugin for AI coding agents (Claude Code, Cursor, Codex) that bundles the remote Snowplow MCP server with a set of Snowplow skills. There is no application code, build step, linter, or test suite: the repository is Markdown skill files plus JSON manifests. See [README.md](README.md) for the user-facing story.
+A plugin for AI coding agents (Claude Code, Cursor, Codex) that bundles the remote Snowplow MCP server with a set of Snowplow skills. There is no application code, build step, linter, or test suite, with one explicit exception: `plugins/snowplow/skills/onboarding/resume.go` is one stdlib Go adapter; no build step, no deps; all other skills remain Markdown-only. The repository is otherwise Markdown skill files plus JSON manifests. See [README.md](README.md) for the user-facing story.
 
 The repository layout, the two manifest formats and their sync rules, the `server.json` constraints, and the local test commands are in DEVELOPMENT.md, imported here so there is one copy to maintain:
 

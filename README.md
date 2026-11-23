@@ -2,6 +2,8 @@
 
 Connect your coding agent to your Snowplow account. This plugin bundles the [Snowplow MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/) with Snowplow skills, so the agent can design your tracking, create the schemas, add the tracker to your app, and fix failed events.
 
+On this branch (`feat/filename-driven-tool-contract`), each MCP tool is a small file named after the tool, and onboarding resumes through one stdlib Go adapter. See [Tools as files](#tools-as-files) and [Go adapter](#go-adapter).
+
 ```bash
 npx plugins add snowplow/skills
 ```
@@ -49,9 +51,13 @@ In Claude Code, you can also add this repository as a plugin marketplace and ins
 
 To connect only the Snowplow MCP server, without the skills, in a client such as Claude.ai or Claude Desktop, follow [Configure the MCP server](https://docs.snowplow.io/docs/ai/snowplow-mcp/#configure-the-mcp-server).
 
+### OpenCode
+
+For OpenCode, follow the MCP setup in [`INSTALL.md`](INSTALL.md). The tools come from the remote Snowplow MCP endpoint configured in `plugins/snowplow/.mcp.json`.
+
 ## Log in
 
-The first time the agent uses a Snowplow tool, a browser window opens so you can log in to Snowplow Console. The agent then works with the permissions of your Console account: it can see and change only what you can.
+The first time the agent uses a Snowplow tool, a browser window opens so you can log in to Snowplow Console. The agent then works with the permissions of your Console account: it can see and change only what you can. Authentication is browser OAuth to Snowplow Console.
 
 If the browser doesn't open in Claude Code, run `/mcp`, select the Snowplow server, and choose **Authenticate**. To work in a different organization, or to use a Console API key instead of a browser login, see [Authentication](https://docs.snowplow.io/docs/ai/snowplow-mcp/#authentication).
 
@@ -99,6 +105,24 @@ The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api
 | [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
 | [`signals`](plugins/snowplow/skills/signals/SKILL.md) | Manages Signals attribute keys, attribute groups, services, interventions, and Agentic Context, and publishes them |
 | [`signals-setup`](plugins/snowplow/skills/signals-setup/SKILL.md) | Sets Signals up in your project: adds tracking, creates and publishes an attribute group and a service, and wires your app to fetch the values |
+
+### Tools as files
+
+Each tool is a module under `plugins/snowplow/tools/<mcp_tool>.md`. The filename is the exact MCP tool name (`list_destinations`, `get_pipeline_metrics`, ...); the body is only a one- or two-line argument note. Adding a tool means one file plus one row in the relevant `SKILL.md` stage table — no code change and no rebuild.
+
+### Go adapter
+
+`plugins/snowplow/skills/onboarding/resume.go` is the one stdlib Go adapter. It reads the onboarding progress file, finds the first unfinished stage, and emits the tool name derived from the `tools/` filename as JSON. There is no build step and no dependencies; all other skills remain Markdown-only.
+
+## Verify on this branch
+
+```bash
+go vet plugins/snowplow/skills/onboarding/resume.go
+(cd /path/to/test-project && go run /abs/path/to/plugins/snowplow/skills/onboarding/resume.go)
+npx plugins discover /path/to/feat:filename-driven-tool-contract
+```
+
+`go run` expects a test project with `docs/snowplow-onboarding.md` and an absolute skill path (`runtime.Caller(0)`).
 
 ## Get help
 
