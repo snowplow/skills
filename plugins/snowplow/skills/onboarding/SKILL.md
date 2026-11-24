@@ -30,7 +30,7 @@ Offer the guided setup, start it only if the user says yes.
 1. Decide, do not ask. After the start question, trial or existing customer, pipeline, Micro, target app, vendor, what to track and how to design it all come from the MCP and the repo. State each decision in one line as you go and list them in the final summary, so the user can redirect. Wait for the user only where the agent cannot act: the browser login in Stage 4, the app actions in Stage 5 when the agent cannot drive the app, the warehouse connection in Stage 6, and the acceptance of the design before Promote for an existing customer. Show the design and wait only when the user explicitly asked to review before changes.
 2. Stop early when nothing downstream can work: the MCP is not authenticated, no pipeline is `ready`, or `list_micros` is empty. Say what to do and end.
 3. Credentials stay in a gitignored `.env` and never reach the model: do not ask for them, read them or print them.
-4. Every path in this skill is relative to the project root, which Stage 1 sets. After each stage, update `docs/snowplow-onboarding.md` (template at the end). On entry, look for it in `docs/`, then in `snowplow-demo/docs/`: the directory that holds it is the project root. Resume from the first stage that is not done.
+4. Every path in this skill is relative to the project root, which Stage 1 sets. After each stage, update `docs/snowplow-onboarding.md` (template at the end). On entry, look for it in `docs/`, then in `snowplow-demo/docs/`: the directory that holds it is the project root. Resume from the first stage that is not done; a `TODO` stage is not done.
 5. Tool names below are Snowplow MCP tools.
 
 ## Stages
@@ -74,7 +74,7 @@ Follow `references/verify.md`. The result of this step is every event specificat
 
 ## Stage 6: Destination
 
-Follow `references/destination.md`. The result of this step is an active warehouse or lake destination, Promote done for an existing customer once the user accepted the design, the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse. When the tracking definitions are managed as code, skip Promote: the repository's CI/CD publishes them once the user merges the change, as the tracking-design skill describes.
+Follow `references/destination.md`. The result of this step is an active warehouse or lake destination, Promote done for an existing customer once the user accepted the design, the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse, with Stages 6 and 7 marked `TODO`. When the tracking definitions are managed as code, skip Promote: the repository's CI/CD publishes them once the user merges the change, as the tracking-design skill describes.
 
 ## Stage 7: Query
 
@@ -82,12 +82,20 @@ Follow `references/query.md`. The result of this step is a view generated from t
 
 ## Final summary
 
-Show the value, not the inventory. In this order: the insight from the data, what is tracked and why, that every event was validated against the schemas and the event specifications so the data can be trusted, how little time the design and the setup took.
+Show the value, not the inventory. In this order: the insight from the data, what is tracked and why, that every event was validated against the schemas and the event specifications so the data can be trusted, how little time the design and the setup took. Close with the `TODO` rows of the progress file, if any, as the user's next steps.
 
 ## Progress file
 
-Create `docs/snowplow-onboarding.md` in the user's repo on the first run and keep it current
-Example:
+Create `docs/snowplow-onboarding.md` in the user's repo on the first run and keep it current.
+
+Status is one of:
+
+- `done`: the stage reached its "Done when".
+- `in progress`: the agent is working on it.
+- `skipped`: the stage does not apply, the note says why.
+- `TODO`: the stage waits on a step only the user can do, such as setting up the warehouse destination, or running the Stage 7 SQL when no warehouse MCP is connected. The note says what the user does next, so they can finish it later or resume the onboarding.
+
+Example, a run that ended after Stage 5 because the user has no warehouse yet:
 
 ````markdown
 # Snowplow onboarding
@@ -98,10 +106,10 @@ Example:
 | 1b Demo app | skipped | app found |
 | 2 Design | done | entities product, order; events add_to_cart, checkout_completed |
 | 3 Create | done | source app <id>, plan <id>, specs <ids> |
-| 4 Instrument | in progress | tracker in src/analytics/snowplow.ts, Snowtype out ./src/snowplow |
-| 5 Verify | | |
-| 6 Destination | | |
-| 7 Query | | |
+| 4 Instrument | done | tracker in src/analytics/snowplow.ts, Snowtype out ./src/snowplow |
+| 5 Verify | done | every spec seen in Micro as a good event, no bad events |
+| 6 Destination | TODO | no warehouse yet: add one in Console, Destinations → Warehouses and lakes → Add destination, then resume the onboarding |
+| 7 Query | TODO | waits on Stage 6 |
 
 ## Design
 
