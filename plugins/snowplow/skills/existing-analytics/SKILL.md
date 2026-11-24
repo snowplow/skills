@@ -26,6 +26,7 @@ The user-facing docs are at https://docs.snowplow.io/docs/signals/data-sources/e
 1. Search the codebase for the tool's snippet or SDK: `analytics.load`, `rudderanalytics`, `gtag(`, `googletagmanager.com`, `amplitude.init`, `alloy(`, `s_gi` or `AppMeasurement`, `adobeDataLayer`, `posthog.init`.
 2. If the site loads the tool only through a tag manager, the change is in the tag manager, not the codebase. Tell the user, and give them exact UI steps from the reference file unless you have browser access to that tag manager.
 3. Default to the recommended approach in the table. Use a server-side approach only for events that don't come from a browser (server libraries, mobile apps), or when the user can't change the page. Never send the same browser events through both, or they arrive twice under two visitor keys.
+4. For PostHog, RudderStack, and Amplitude, check whether the tool's official MCP server is connected. If it is, use it to read the event names the site actually sends, so the event-name lists in Phase 3 match.
 
 ## Phase 2: Create the two schemas
 
@@ -41,6 +42,7 @@ Every adapter sends a generic `external_event` and attaches an `external_identit
 1. Get a Collector URL. If the user gave one, use it for production. Test first against the Console development environment, a hosted Snowplow Micro included with every trial: find it with `list_micros`, or the pipelines with `list_pipelines`. Check that Signals is set up with `list_signals_environments`.
 2. Get the app ID: ask the user, or reuse a source app from `list_source_apps`.
 3. Follow the reference file for the chosen approach. Copy the scripts from `scripts/<tool>/` into the user's static assets or tool configuration. Change only the adaptation points the reference file names: the schema vendor, the Collector URL, the app ID, and event-name lists for ecommerce and search events if the user's names differ from the tool's standard names.
+4. For a server-side approach on PostHog or RudderStack with the tool's MCP server connected, create the destination or transformation through it instead of giving the user UI steps, and test it there before you send real traffic. Ask before you create or change anything in the tool, as you would in Console.
 
 ## Phase 4: Verify
 
