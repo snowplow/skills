@@ -26,7 +26,7 @@ You need:
 - Access to change your Adobe setup: the Tags property, or the page code that configures the Web SDK.
 - A list of the XDM fields that hold the user ID, plan, account ID and search term. The adapter reads only the fields you name.
 
-The `external_event` and `external_identity` schemas aren't on Iglu Central. Create them in your Snowplow registry under your own vendor, from the JSON in `references/schemas/` with `com.example` replaced, and set `VENDOR` in the scripts to the same vendor. The other schemas the adapter uses are on Iglu Central. See [external_event](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-event.md) and [external_identity](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-identity.md).
+The `external_event` and `external_identity` schemas aren't on Iglu Central. Create them in your Snowplow registry under your own vendor, from the JSON in `references/schemas/` with `com.example` replaced, and set `VENDOR` in the scripts to the same vendor. The other schemas the adapter uses are on Iglu Central. See [external_event](schemas/external_event.json) and [external_identity](schemas/external_identity.json).
 
 ## Set up the Web SDK callback
 

@@ -205,4 +205,4 @@ See [Identifiers](https://docs.snowplow.io/docs/signals/data-sources/existing-an
 - **Ecommerce events arrive as `external_event`:** the event name isn't a Segment spec name, or it lacks a price, currency or order ID. Rename it, or add the missing field.
 - **Events arrive twice:** both approaches receive your browser source. Connect the Destination Function only to server and app sources.
 - **No events when analytics.js is blocked:** the plugin runs inside analytics.js, so an ad blocker or consent tool that stops it stops the plugin too.
-- **A property is missing from attributes:** Signals only reads fields a schema declares. Map it to a typed `external_event` field. See [external_event](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-event.md).
+- **A property is missing from attributes:** Signals only reads fields a schema declares. Map it to a typed `external_event` field. See [external_event](schemas/external_event.json).

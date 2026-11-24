@@ -244,4 +244,4 @@ On the server-side approaches, an event with no `anonymousId`, such as a server-
 - **Ecommerce events arrive as `external_event`:** the event name isn't a spec name, or it lacks a price, currency or order ID. Rename it, or add the missing field.
 - **Events arrive twice:** both approaches receive your browser source. Connect the server-side destination only to server and mobile sources.
 - **A changed transformation has no effect:** publish it as a new version.
-- **A property is missing from attributes:** Signals only reads fields a schema declares. Map it to a typed `external_event` field. See [external_event](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-event.md).
+- **A property is missing from attributes:** Signals only reads fields a schema declares. Map it to a typed `external_event` field. See [external_event](schemas/external_event.json).

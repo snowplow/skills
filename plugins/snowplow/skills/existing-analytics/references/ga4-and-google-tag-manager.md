@@ -22,7 +22,7 @@ You need:
 - GA4 on your site, through a web GTM container or gtag.js
 - a Snowplow Collector URL for a pipeline with Signals enabled
 
-The `external_event` and `external_identity` schemas aren't on Iglu Central. Create them in your Snowplow registry under your own vendor, from the JSON in `references/schemas/` with `com.example` replaced, and use that vendor wherever this page shows `VENDOR` or `<your-vendor>`. Every other schema on this page is on Iglu Central. See [external_event](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-event.md) and [external_identity](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-identity.md).
+The `external_event` and `external_identity` schemas aren't on Iglu Central. Create them in your Snowplow registry under your own vendor, from the JSON in `references/schemas/` with `com.example` replaced, and use that vendor wherever this page shows `VENDOR` or `<your-vendor>`. Every other schema on this page is on Iglu Central. See [external_event](schemas/external_event.json) and [external_identity](schemas/external_identity.json).
 
 ## Set up GTM tag templates
 
@@ -427,7 +427,7 @@ Each GA4 event takes the first rung of the [event mapping ladder](https://docs.s
 
 In the page script, an ecommerce event that lacks a field the Snowplow schemas require becomes `external_event` instead: any ecommerce event with items but no `currency`, an `add_to_cart` or `remove_from_cart` with no `currency`, a `purchase` with no `currency`, `transaction_id` or `value`, a `refund` with no `currency`, `transaction_id` or `value`, and a `select_item` with no item. Items without `item_id` are left out, and a `purchase` counts an item with no `quantity` as one. `payment_method` is `unknown` when the event has no `payment_type`, and `category` is `unknown` when an item has none. The GTM tag templates don't apply these checks (see step 6).
 
-Every event also carries an `external_identity` entity. See [external_identity](https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/reference/external-identity.md). On server-side GTM, only the events you map get Snowplow schemas.
+Every event also carries an `external_identity` entity. See [external_identity](schemas/external_identity.json). On server-side GTM, only the events you map get Snowplow schemas.
 
 ## Identifiers
 
