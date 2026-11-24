@@ -8,7 +8,7 @@ compatibility: Requires Node.js for the mcp-remote connector and OAuth-based acc
 
 You are helping a user send the events their site already sends to another analytics tool to Snowplow, so Snowplow Signals can calculate attributes on them. An **adapter** maps each event from the tool to a Snowplow event and sends it to the user's Collector. The user keeps their existing tool.
 
-Each tool has a tested setup in `references/<tool>.md` and its mapping scripts in `scripts/<tool>/`. Use them. Don't write a new mapping from scratch: the scripts already handle edge cases such as missing currencies, ID length limits, retries, and deduplication.
+Each tool has a tested setup in `references/<tool>.md` and reference mapping scripts in `scripts/<tool>/`. Start from them rather than writing a mapping from scratch: they already handle edge cases such as missing currencies, ID length limits, retries, and deduplication. Adapt them to the user's setup where it needs it, such as their event names, TypeScript, a bundler, or a framework's routing, as long as the output still follows [the mapping contract](#the-mapping-contract) and [Identifiers and keys](#identifiers-and-keys). The Signals guidance in Phase 5 depends on that output.
 
 | Tool | Reference | Recommended approach |
 | --- | --- | --- |
@@ -41,14 +41,15 @@ Every adapter sends a generic `external_event` and attaches an `external_identit
 
 1. Get a Collector URL. If the user gave one, use it for production. Test first against the Console development environment, a hosted Snowplow Micro included with every trial: find it with `list_micros`, or the pipelines with `list_pipelines`. Check that Signals is set up with `list_signals_environments`.
 2. Get the app ID: ask the user, or reuse a source app from `list_source_apps`.
-3. Follow the reference file for the chosen approach. Copy the scripts from `scripts/<tool>/` into the user's static assets or tool configuration. Change only the adaptation points the reference file names: the schema vendor, the Collector URL, the app ID, and event-name lists for ecommerce and search events if the user's names differ from the tool's standard names.
+3. Follow the reference file for the chosen approach. Copy the scripts from `scripts/<tool>/` into the user's code, static assets, or tool configuration. Set the adaptation points the reference file names: the schema vendor, the Collector URL, the app ID, and the event-name lists for ecommerce and search events if the user's names differ from the tool's standard names. Adapt anything else the user's setup needs, and keep the edge-case handling unless it can't apply. Tell the user what you changed beyond the adaptation points.
 4. For a server-side approach on PostHog or RudderStack with the tool's MCP server connected, create the destination or transformation through it instead of giving the user UI steps, and test it there before you send real traffic. Ask before you create or change anything in the tool, as you would in Console.
 
 ## Phase 4: Verify
 
 1. Send a page view, a product view, an order, and a login or identify call through the user's tool.
 2. Check with `list_micro_events` and `get_micro_event`, or `get_failed_events_metrics` and `get_failed_event_detail` on a pipeline, that the events in the reference file's "Check it works" list arrive and none failed.
-3. Fix failures before you switch to the production Collector. A failure on every event usually means the two schemas aren't deployed to that environment, or the vendor in the script doesn't match the vendor the schemas were created under.
+3. If you changed the scripts beyond the adaptation points, also check each event against [the mapping contract](#the-mapping-contract): the rung it took, the schemas and entities, `external_identity` on every event, and the user ID only in `user_id` fields, never in `domain_userid` or `anonymous_id`.
+4. Fix failures before you switch to the production Collector. A failure on every event usually means the two schemas aren't deployed to that environment, or the vendor in the script doesn't match the vendor the schemas were created under.
 
 ## Phase 5: Privacy, then attributes
 

@@ -1,6 +1,6 @@
 # Segment
 
-Tested setup for sending Segment events to Snowplow. The mapping lives in `scripts/segment/segment-snowplow-adapter.js`; both approaches use it unchanged except at the adaptation points. Set `vendor` in `ADAPTER` to the vendor the customer created the `external_event` and `external_identity` schemas under in their own Snowplow registry (the copies in `references/schemas/` use `com.example`). Adapt the event-name checks in `standardEvent` if the customer's event names differ from the Segment v2 spec.
+Tested setup for sending Segment events to Snowplow. The mapping lives in `scripts/segment/segment-snowplow-adapter.js`; both approaches use it, set at the adaptation points. Set `vendor` in `ADAPTER` to the vendor the customer created the `external_event` and `external_identity` schemas under in their own Snowplow registry (the copies in `references/schemas/` use `com.example`). Adapt the event-name checks in `standardEvent` if the customer's event names differ from the Segment v2 spec.
 
 ## Choose an approach
 
