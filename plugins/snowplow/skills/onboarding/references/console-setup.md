@@ -12,13 +12,17 @@ Everything runs through Snowplow MCP tools. Each step names the tool and the fie
 
 App ID: lowercase, hyphenated, the product name (`acme-web`). The tracker config in Stage 4 uses the same value.
 
+## Tracking as code
+
+When Stage 1 decided the tracking definitions are managed as code, write the schemas, the source app, the tracking plan and its event specifications as files in the repository, as the tracking-design skill describes, instead of the calls above. Then publish them to development with the Snowplow CLI, so the Micro in Stage 5 validates against them, unless the repository's CI/CD publishes them, as Git-managed resources below describes. In that case Stage 5 waits until the merge has published them to development.
+
 ## Iglu URIs
 
 `iglu:<vendor>/<name>/jsonschema/<version>`, for example `iglu:com.acme/product/jsonschema/1-0-0`. Specs and source apps need the full version.
 
 ## Promote
 
-The pipeline validates against PROD schemas and published specs only. `promote_data_structure` with `target: PROD` for every schema, `publish_tracking_plan` with the plan id, asynchronous, then `get_tracking_plan` until every spec is `published`. Micro and the pipeline can take up to five minutes more to pick them up, do not wait for that. A trial runs it here. An existing customer runs it in Stage 6, after the Micro run, which validates DEV schemas and draft specs, and only once the user has reviewed and accepted the design.
+The pipeline validates against PROD schemas and published specs only. `promote_data_structure` with `target: PROD` for every schema, `publish_tracking_plan` with the plan id, asynchronous, then `get_tracking_plan` until every spec is `published`. Micro and the pipeline can take up to five minutes more to pick them up, do not wait for that. A trial runs it here. An existing customer runs it in Stage 6, after the Micro run, which validates DEV schemas and draft specs, and only once the user has reviewed and accepted the design. When the tracking definitions are managed as code, Promote publishes them to production with the Snowplow CLI, or, when the repository's CI/CD publishes them, the user merges the change that publishes to production.
 
 ## Git-managed resources
 

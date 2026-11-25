@@ -62,11 +62,11 @@ Follow `references/design.md`. The result of this step is a JSON Schema per enti
 
 ## Stage 3: Create in Console
 
-Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created in Console, with their ids in the progress file, and Promote done on a trial. When Stage 1 decided the tracking definitions are managed as code, follow the tracking-design skill instead and write them as files in the repository.
+Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created in Console, or written as files in the repository and published when the tracking definitions are managed as code, with their ids in the progress file, and Promote done on a trial.
 
 ## Stage 4: Instrument
 
-Follow `references/instrumentation.md`. The result of this step is the implementation decided, Snowtype or direct tracker calls, and the tracking code integrated into the application, which builds and runs. When the tracking definitions are managed as code and Snowtype supports the platform, generate the code with Snowtype from the local tracking plans as the implementation-guidance skill describes; other platforms call the tracker directly, as `references/instrumentation.md` describes.
+Follow `references/instrumentation.md`. The result of this step is the implementation decided, Snowtype or direct tracker calls, and the tracking code integrated into the application, which builds and runs.
 
 ## Stage 5: Verify
 
@@ -74,7 +74,7 @@ Follow `references/verify.md`. The result of this step is every event specificat
 
 ## Stage 6: Destination
 
-Follow `references/destination.md`. The result of this step is an active warehouse or lake destination, Promote done for an existing customer once the user accepted the design, the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse, with Stages 6 and 7 marked `TODO`. When the tracking definitions are managed as code, skip Promote: the repository's CI/CD publishes them once the user merges the change, as the tracking-design skill describes.
+Follow `references/destination.md`. The result of this step is an active warehouse or lake destination, Promote done for an existing customer once the user accepted the design, the tracker pointed at the pipeline collector and one round of events sent to it, or the run ended after Stage 5 because the user has no warehouse, with Stages 6 and 7 marked `TODO`.
 
 ## Stage 7: Query
 
