@@ -45,11 +45,11 @@ Snowplow tracking implementation follows this lifecycle. Walk the user through e
 
 Snowtype is Snowplow's CLI that generates type-safe tracking code from event specifications, tracking plans, data structures, and Iglu Central schemas. It eliminates hand-written Iglu URIs and field names, and automatically attaches event specification entities.
 
-Do not rely on built-in knowledge for Snowtype commands, configuration options, or supported trackers — fetch the current docs instead (see **Snowtype Reference** below). Walk the user through:
+Do not rely on built-in knowledge for Snowtype commands, configuration options, or supported trackers — use the CLI's built-in help and the current docs instead (see **Snowtype Reference** below). Walk the user through:
 
 1. Installing and authenticating the Snowtype CLI, and initialising it in their project
-   - Snowtype authenticates with a **Snowplow Console API key**, which you cannot create or retrieve on the user's behalf. Ask whether they already have one. If they don't, pause and ask them to set up authentication manually first: they need to generate an API key (and note its API key ID and organization ID) in Snowplow Console under **Settings → Manage organization**, then make it available to Snowtype (e.g. via the credentials/environment variables described in the Snowtype docs). Fetch the Snowtype authentication docs for the exact setup steps rather than guessing variable names. Do not proceed with `init` or code generation until the user confirms authentication is in place.
-2. Creating the Snowtype configuration: if `snowtype.config.json` doesn't exist in the project yet, run `npx snowtype init` **exactly as written, with no flags or arguments** — the command does not accept flags; it prompts interactively for the tracker, language, and output path. Do not invent CLI options; if the interactive prompts can't be completed in this environment, ask the user to run `npx snowtype init` themselves or write `snowtype.config.json` directly based on the configuration reference docs. Then configure which event specs / tracking plans / data structures to generate code for, and the target tracker and language for their platform
+   - Snowtype authenticates with a **Snowplow Console API key**. Ask whether they already have one set up. If they don't, run `npx --yes @snowplow/snowplow-cli@latest setup --dotenv` in the project: the user approves the sign-in in their browser, and the command creates an API key and saves it to the project's `.env`, where Snowtype reads it. Never ask the user to paste the key into the conversation, and never read or print `.env`. Do not proceed with `init` or code generation until authentication is in place.
+2. Creating the Snowtype configuration: if `snowtype.config.json` doesn't exist in the project yet, run `npx snowtype init`, which prompts interactively for the tracker, language, and output path. If the interactive prompts can't be completed in this environment, ask the user to run `npx snowtype init` themselves or write `snowtype.config.json` directly based on the configuration reference docs. Then configure which event specs / tracking plans / data structures to generate code for, and the target tracker and language for their platform
 3. Running code generation and wiring the generated tracking functions into their application
 4. Keeping generated code up to date when schemas and event specs change
 
@@ -126,13 +126,15 @@ Always fetch the docs rather than generating tracker code from memory.
 
 ## Snowtype Reference
 
-As with tracker APIs, do not rely on built-in knowledge for Snowtype — its commands, configuration options, and supported trackers change between releases. Instead:
+As with tracker APIs, do not rely on built-in knowledge for Snowtype — its commands, configuration options, and supported trackers change between releases.
+
+For commands and flags, use the CLI's built-in help: `npx snowtype --help` and `npx snowtype <command> --help`.
+
+Fetch the docs only for what the help does not cover, such as installation, the configuration file, the supported trackers and languages, and example generated code:
 
 1. Use `fetch_documentation_index` to get the Snowplow documentation sitemap
-2. Find the Snowtype pages — they live under the "Implement tracking" section of the Event Studio docs (look for titles mentioning Snowtype, e.g. getting started/installation, generate tracking code, CLI command reference, configuration reference, keeping code up to date, and example generated code)
-3. Use `fetch_documentation_page` to fetch the pages relevant to the user's current step and base all installation instructions, CLI commands, and configuration files on them
-
-Always fetch the docs rather than writing Snowtype commands or configuration from memory.
+2. Find the Snowtype pages — they live under the "Implement tracking" section of the Event Studio docs
+3. Use `fetch_documentation_page` to fetch the pages relevant to the user's current step
 
 ---
 
