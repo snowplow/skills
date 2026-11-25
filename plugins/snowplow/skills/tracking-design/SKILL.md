@@ -1,25 +1,6 @@
 ---
 name: tracking-design
 description: "Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say \"tracking plan.\" Triggers: schema design, tracking plan, event spec, Iglu, entities, data product."
-tools:
-  - list_schemas
-  - get_schema_properties
-  - get_data_structure_by_hash
-  - create_schema_version
-  - create_event_specification
-  - update_event_specification
-  - list_event_specifications
-  - get_event_specification
-  - get_event_spec_metrics
-  - search_iglu_central
-  - list_tracking_plans
-  - get_tracking_plan
-  - create_tracking_plan
-  - edit_tracking_plan
-  - list_data_catalog
-  - search_data_catalog
-  - list_source_apps
-  - get_source_app
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -41,7 +22,7 @@ It is important you never create schemas or event specifications without explici
 
 - List existing schemas and tracking plans using the list_schemas and list_tracking_plans tools to understand the current state of the customer's tracking setup.
 - If working within a specific tracking plan, use get_tracking_plan to fetch the plan details along with all its event specs. Otherwise, use list_event_specifications (with the optional dataProductId filter to scope to a specific plan if known).
-- If the tracking plan has source applications, fetch them with get_source_app — their entities are inherited by every event spec and don't need to be added per-spec (see Source Application Entity Inheritance below).
+- If the tracking plan has source applications, fetch them with get_source_app — their entities are inherited by every event spec and don't need to be added per-spec. They cover tracker, plugin and enriched entities only; custom entities still go on each event spec (see Source Application Entity Inheritance below).
 - Understand the customer's current tracking setup
 - If the user references a Console data-structure URL (`/data-structures/<hash>`), resolve it with get_data_structure_by_hash to identify which schema they mean.
 - Search Iglu Central for relevant public schemas for common use cases
@@ -102,11 +83,13 @@ Note: Event specifications include both the event schema and all entity schemas 
 
 A tracking plan can be linked to one or more source applications. Entities defined on a source application are **automatically inherited by every event specification in that tracking plan** — they do not need to be (and should not be) added to individual event specs. Users can exclude source applications from specific event specs if needed.
 
+Source application entities are meant for entities that the tracker or its plugins attach automatically, and for enriched entities that the pipeline adds. Snowtype treats them as application context and generates no tracking code for them. A custom entity that the application code must attach belongs on each event spec that uses it, even when it is sent with every event: Snowtype generates code only for entities declared on the event spec, so a custom entity declared only on the source application is never sent. Don't declare an entity in both places, because Snowtype then warns about the overlap.
+
 When designing event specs within a tracking plan that has source applications:
 
 1. Use get_tracking_plan to see which source apps are linked and what entities they provide — these are listed under "Inherited tracked/enriched entities" in the tool output.
 2. Use get_schema_properties on those entity Iglu URIs to understand what fields are already being captured.
-3. Do not duplicate inherited entities on individual event specs. Only add entities to an event spec if they are specific to that event and not already inherited from the source application.
+3. Do not duplicate inherited entities on individual event specs. Add an entity to an event spec if it is specific to that event, or if it is a custom entity that the application code attaches.
 4. When presenting a design proposal, call out which entities are inherited (and therefore automatic) vs. which are being added specifically to the event spec.
 
 **Example**: If a source app defines `iglu:com.snowplowanalytics.mobile/application/jsonschema/1-0-0` as an inherited entity, you do not need to add it to any event spec in the plan — it will always be present on every event.
@@ -171,3 +154,24 @@ If a user says "data product", interpret it as "tracking plan" — same concept,
 - SchemaVer format is MAJOR-MINOR-PATCH (e.g., "1-0-0")
 - Iglu URIs follow format: iglu:vendor/name/format/version
 - Property instructions help developers implement tracking correctly
+
+## Tools
+
+- `list_schemas` — existing schemas and their deployment status
+- `get_schema_properties` — field names, types, and requirements for a schema
+- `get_data_structure_by_hash` — resolve a Console `/data-structures/<hash>` URL to the schema it refers to
+- `create_schema_version` — create a new schema version (event or entity; never edit published ones)
+- `search_iglu_central` — search public schemas for reuse
+- `list_tracking_plans` — tracking plans (formerly data products)
+- `get_tracking_plan` — one plan with its event specs and inherited source-app entities
+- `create_tracking_plan` — create a tracking plan
+- `edit_tracking_plan` — edit a tracking plan's metadata (name, description, domain, access instructions) — only the fields you pass are changed
+- `list_event_specifications` — list event specs (optional `dataProductId` filter)
+- `get_event_specification` — full event spec details
+- `create_event_specification` — create an event spec (event schema + all entities in one call)
+- `update_event_specification` — update an existing event spec
+- `get_event_spec_metrics` — event volume metrics for a spec
+- `list_data_catalog` — tracked schemas and their relationships
+- `search_data_catalog` — search the catalog by name, vendor, or description
+- `list_source_apps` — source applications linked to tracking plans
+- `get_source_app` — source app details and the entities it provides
