@@ -89,8 +89,9 @@ Run Snowplow CLI with `npx --yes @snowplow/snowplow-cli@latest` rather than an i
 
 ### Authentication
 
-- `npx snowtype login` (with Snowtype installed in the project, otherwise `npx --yes @snowplow/snowtype@latest login`) and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one. Logging out of either logs out of both.
-- An API key takes precedence over the login in both tools. Use an API key where nobody can sign in, such as CI. `snowplow-cli setup --dotenv` creates one after the user approves the sign-in in their browser and saves it to the project's `./.env`, where both tools read it.
+- `npx snowtype login` (with Snowtype installed in the project, otherwise `npx --yes @snowplow/snowtype@latest login`) and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one and needs no API key. Prefer the login on a developer's machine. Logging out of either logs out of both.
+- An API key takes precedence over the login in both tools. Use an API key only where nobody can sign in, such as CI, and pass it there through the CI system's secrets as environment variables.
+- If the user wants an API key on their own machine instead of the login, `snowplow-cli setup --dotenv` creates one after they approve the sign-in in their browser and saves it to the project's `./.env`, where both tools read it. Never commit that file: check that `.env` is in `.gitignore`.
 - `snowplow-cli status` shows which one is in use: `auth=login` or `auth=api-key`.
 - Never ask the user to paste a key, token or secret into the conversation, never read, print or search `.env` or the saved login, and never put a key on a command line. Let the tools read their own credentials. `snowplow-cli status` checks Snowplow CLI's credentials and shows the key id but never the key. Snowtype shares them only through the browser login, or when the key is in the environment or in the project's `./.env`: it does not read the global Snowplow CLI configuration.
 
