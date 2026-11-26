@@ -62,7 +62,7 @@ Follow `references/design.md`. The result of this step is a JSON Schema per enti
 
 ## Stage 3: Create in Console
 
-Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created in Console, with their ids in the progress file, and Promote done on a trial.
+Follow `references/console-setup.md`. The result of this step is every schema, the source app, the tracking plan and its event specifications created in Console, or written as files in the repository and published when the tracking definitions are managed as code, with their ids in the progress file, and Promote done on a trial.
 
 ## Stage 4: Instrument
 
