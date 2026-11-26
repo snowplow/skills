@@ -99,6 +99,7 @@ The `snowplow` MCP server connects to `https://console.snowplowanalytics.com/api
 | [`console-operations`](plugins/snowplow/skills/console-operations/SKILL.md) | Creates, updates, or deletes Console resources: enrichment configuration, data quality alerts, source applications, and tracking plans |
 | [`signals`](plugins/snowplow/skills/signals/SKILL.md) | Manages Signals attribute keys, attribute groups, services, interventions, and Agentic Context, and publishes them |
 | [`signals-setup`](plugins/snowplow/skills/signals-setup/SKILL.md) | Sets Signals up in your project: adds tracking, creates and publishes an attribute group and a service, and wires your app to fetch the values |
+| [`existing-analytics`](plugins/snowplow/skills/existing-analytics/SKILL.md) | Sends the events you already track with Segment, RudderStack, GA4 or GTM, Amplitude, Adobe, or PostHog to Snowplow with a tested adapter, so Signals can use them without retagging |
 
 ## Get help
 

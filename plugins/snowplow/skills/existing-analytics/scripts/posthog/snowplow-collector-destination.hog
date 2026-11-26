@@ -1,0 +1,189 @@
+// Snowplow collector destination for PostHog (paste into a new HTTP Webhook destination, Edit source code).
+// Inputs: collector_url (https://collector.example.com), app_id, debug (the template's Log responses).
+// Sends each event down the ladder: page_view, Snowplow ecommerce with every product, site_search,
+// identify with the id only, external_event for the rest; external_identity on every event.
+// Person properties, $set and $set_once are never read, so traits such as email stay in PostHog.
+
+let TOOL := 'posthog'
+let E := 'iglu:com.snowplowanalytics.snowplow.ecommerce/'
+// Your vendor: the one you created external_event and external_identity under.
+let VENDOR := 'com.example'
+let V := f'iglu:{VENDOR}/'
+let DROP := ['$snapshot', '$$heatmap', '$feature_flag_called', '$web_vitals', '$exception', '$$client_ingestion_warning', '$opt_in', '$set']
+let ECOM := {
+  'product viewed': 'product_view', 'product added': 'add_to_cart', 'product removed': 'remove_from_cart',
+  'checkout started': 'checkout_step', 'checkout step viewed': 'checkout_step', 'checkout step completed': 'checkout_step',
+  'order completed': 'transaction', 'order refunded': 'refund'
+}
+
+fun isNum(v) { return typeof(v) = 'integer' or typeof(v) = 'float' }
+fun num(v) {
+  if (isNum(v)) { return v }
+  if (typeof(v) = 'string' and v =~ '^-?[0-9]+(\\.[0-9]+)?$') { return toFloat(v) }
+  return null
+}
+fun money(v) {
+  let n := num(v)
+  if (n = null or n < 0) { return null }
+  return round(n * 100) / 100
+}
+fun int(v) {
+  let n := num(v)
+  if (n = null or n < 0) { return null }
+  return toInt(round(n))
+}
+fun cur3(v) {
+  if (typeof(v) = 'string' and v =~ '^[A-Za-z]{3}$') { return upper(v) }
+  return null
+}
+fun str255(v) {
+  if (v = null or (typeof(v) != 'string' and not isNum(v) and typeof(v) != 'boolean')) { return null }
+  let s := toString(v)
+  if (empty(s)) { return null }
+  return substring(s, 1, 255)
+}
+fun compact(o) {
+  let r := {}
+  for (let k, v in o) {
+    if (v != null and v != '') { r[k] := v }
+  }
+  return r
+}
+fun sdj(schema, data) { return {'schema': schema, 'data': data} }
+
+fun product(it, currency) {
+  let id := str255(it.product_id ?? it.sku ?? it.id)
+  let price := money(it.price)
+  let cur := cur3(it.currency) ?? currency
+  if (id = null or price = null or cur = null) { return null }
+  let out := compact({'id': id, 'name': str255(it.name), 'price': price, 'currency': cur, 'quantity': int(it.quantity),
+    'variant': str255(it.variant), 'brand': str255(it.brand), 'position': int(it.position)})
+  out['category'] := str255(it.category) ?? ''
+  return out
+}
+fun products(p, currency) {
+  let out := []
+  if (typeof(p.products) = 'array') {
+    for (let it in p.products) {
+      let x := product(it ?? {}, currency)
+      if (x != null) { out := arrayPushBack(out, x) }
+    }
+  }
+  return out
+}
+fun prodEntities(list) {
+  let out := []
+  for (let x in list) { out := arrayPushBack(out, sdj(f'{E}product/jsonschema/1-0-0', x)) }
+  return out
+}
+
+let ev := event
+let p := ev.properties ?? {}
+let name := ev.event
+let lname := lower(trim(toString(name)))
+
+if (has(DROP, name)) {
+  if (inputs.debug) { print('skipped', name) }
+} else {
+  let deviceId := p.$device_id
+  let identified := name = '$identify' or (deviceId != null and ev.distinct_id != deviceId)
+  let uid := null
+  if (identified and notEmpty(ev.distinct_id)) {
+    uid := ev.distinct_id
+    uid := substring(uid, 1, 255)
+  }
+  let anon := deviceId
+  if (anon = null and ev.distinct_id != '$posthog_cookieless' and uid = null) { anon := ev.distinct_id }
+
+  let isPv := name = '$pageview'
+  let ue := null
+  let ents := []
+  let cur := cur3(p.currency)
+  let type := ECOM[lname]
+
+  if (not isPv) {
+    if (name = '$identify' and uid != null) {
+      ue := sdj('iglu:com.snowplowanalytics.snowplow/identify/jsonschema/1-0-0', {'id': uid})
+    } else if (lname = 'products searched' and str255(p.query) != null) {
+      ue := sdj('iglu:com.snowplowanalytics.snowplow/site_search/jsonschema/1-0-0', {'terms': [str255(p.query)]})
+    } else if (type = 'product_view' or type = 'add_to_cart' or type = 'remove_from_cart') {
+      let one := product(p, cur)
+      if (one != null) {
+        ents := prodEntities([one])
+        let total := money(p.cart_total ?? p.value)
+        if (type != 'product_view' and total != null) {
+          ents := arrayPushBack(ents, sdj(f'{E}cart/jsonschema/1-0-0', compact({'cart_id': str255(p.cart_id), 'total_value': total, 'currency': one.currency})))
+        }
+        ue := sdj(f'{E}snowplow_ecommerce_action/jsonschema/1-0-2', {'type': type})
+      }
+    } else if (type = 'checkout_step') {
+      let step := int(p.step)
+      if (step = null or step < 1 or step > 90) { step := 1 }
+      ents := arrayPushBack(prodEntities(products(p, cur)), sdj(f'{E}checkout_step/jsonschema/1-0-0', compact({'step': step,
+        'delivery_method': str255(p.shipping_method), 'payment_method': str255(p.payment_method), 'coupon_code': str255(p.coupon)})))
+      ue := sdj(f'{E}snowplow_ecommerce_action/jsonschema/1-0-2', {'type': type})
+    } else if (type = 'transaction') {
+      let rev := money(p.revenue ?? p.total ?? p.value)
+      let oid := str255(p.order_id ?? p.checkout_id)
+      if (cur != null and rev != null and oid != null) {
+        let ps := products(p, cur)
+        let qty := 0
+        for (let x in ps) { qty := qty + (x.quantity ?? 1) }
+        ents := arrayPushBack(prodEntities(ps), sdj(f'{E}transaction/jsonschema/1-0-0', compact({'transaction_id': oid, 'revenue': rev,
+          'currency': cur, 'payment_method': str255(p.payment_method) ?? 'unknown', 'total_quantity': qty,
+          'tax': money(p.tax), 'shipping': money(p.shipping), 'discount_code': str255(p.coupon), 'discount_amount': money(p.discount)})))
+        ue := sdj(f'{E}snowplow_ecommerce_action/jsonschema/1-0-2', {'type': type})
+      }
+    } else if (type = 'refund') {
+      let amt := money(p.total ?? p.revenue ?? p.value)
+      if (cur != null and amt != null and p.order_id != null) {
+        ents := arrayPushBack(prodEntities(products(p, cur)), sdj(f'{E}refund/jsonschema/1-0-0', {'transaction_id': str255(p.order_id), 'currency': cur, 'refund_amount': amt}))
+        ue := sdj(f'{E}snowplow_ecommerce_action/jsonschema/1-0-2', {'type': type})
+      }
+    }
+    if (ue = null) {
+      ents := []
+      let kind := 'track'
+      if (name = '$groupidentify') { kind := 'group' } else if (name = '$create_alias') { kind := 'alias' } else if (name = '$identify') { kind := 'identify' }
+      let first := {}
+      if (typeof(p.products) = 'array' and length(p.products) > 0) { first := p.products[1] ?? {} }
+      let value := num(p.revenue ?? p.value ?? p.total ?? p.price)
+      if (name = '$pageleave') { value := num(p.$prev_pageview_duration) }
+      ue := sdj(f'{V}external_event/jsonschema/1-0-0', compact({
+        'name': substring(toString(name ?? 'unknown'), 1, 255), 'tool': TOOL, 'kind': kind, 'value': value, 'currency': cur,
+        'item_id': str255(p.product_id ?? p.sku ?? first.product_id), 'item_category': str255(p.category ?? first.category),
+        'search_term': typeof(p.query) = 'string' ? str255(p.query) : null,
+        'plan': str255(p.plan ?? (kind = 'group' ? p.$group_set?.plan : null)),
+        'group_id': kind = 'group' ? str255(p.$group_key) : null,
+        'previous_id': kind = 'alias' ? str255(p.alias) : null
+      }))
+    }
+  }
+
+  let ctx := arrayPushBack(ents, sdj(f'{V}external_identity/jsonschema/1-0-0', {'tool': TOOL,
+    'anonymous_id': anon != null ? substring(toString(anon), 1, 255) : null, 'user_id': uid, 'session_id': p.$session_id ?? null,
+    'session_number': null, 'event_id': ev.uuid ?? null, 'event_name': substring(toString(name), 1, 255)}))
+  let t := toString(toUnixTimestampMilli(toDateTime(ev.timestamp)))
+  let tp := compact({
+    'e': isPv ? 'pv' : 'ue', 'p': 'web', 'tv': 'posthog-hog-0.1', 'aid': inputs.app_id, 'eid': ev.uuid,
+    'dtm': t, 'ttm': t, 'stm': toString(toUnixTimestampMilli(now())),
+    'duid': anon, 'tnuid': anon, 'uid': uid,
+    // $session_id is a UUIDv7, so it fits domain_sessionid as is.
+    'sid': (typeof(p.$session_id) = 'string' and p.$session_id =~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$') ? p.$session_id : null,
+    'ip': p.$ip, 'ua': p.$raw_user_agent, 'lang': p.$browser_language,
+    'url': p.$current_url, 'refr': (p.$referrer = '$direct') ? null : p.$referrer,
+    'res': (p.$screen_width != null) ? f'{p.$screen_width}x{p.$screen_height}' : null,
+    'page': isPv ? (p.title ?? null) : null,
+    'ue_pr': ue != null ? jsonStringify(sdj('iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0', ue)) : null,
+    'co': length(ctx) > 0 ? jsonStringify(sdj('iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1', ctx)) : null
+  })
+  let res := fetch(f'{inputs.collector_url}/com.snowplowanalytics.snowplow/tp2', {
+    'method': 'POST',
+    'headers': {'Content-Type': 'application/json; charset=utf-8'},
+    'body': sdj('iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4', [tp])
+  })
+  if (res.status >= 400) {
+    throw Error(f'Snowplow collector returned {res.status}')
+  }
+  if (inputs.debug) { print('sent', name, res.status) }
+}

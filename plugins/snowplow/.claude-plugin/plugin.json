@@ -1,7 +1,7 @@
 {
   "name": "snowplow",
   "displayName": "Snowplow",
-  "description": "Snowplow skills bundled with the Snowplow MCP server. Includes guided onboarding, tracking design, implementation guidance, Signals, pipeline infrastructure, console operations, and troubleshooting.",
+  "description": "Snowplow skills bundled with the Snowplow MCP server. Includes guided onboarding, tracking design, implementation guidance, Signals, adapters for existing analytics tools, pipeline infrastructure, console operations, and troubleshooting.",
   "author": {
     "name": "Snowplow Analytics",
     "url": "https://snowplow.io"
