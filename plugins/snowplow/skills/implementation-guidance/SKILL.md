@@ -1,6 +1,6 @@
 ---
 name: implementation-guidance
-description: "Help developers instrument Snowplow trackers in their applications. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker."
+description: "Help developers instrument Snowplow trackers in their applications, either by writing tracker code directly or by generating type-safe code with Snowtype. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker, Snowtype, generate tracking code."
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
@@ -28,6 +28,12 @@ Snowplow tracking implementation follows this lifecycle. Walk the user through e
    - Use `list_source_apps` to check if they have a source app for their platform
 
 3. Implement the events with Snowtype (see **Snowtype and Snowplow CLI** below). Write tracker calls by hand only when Snowtype does not support their tracker and language, or the user asks for hand-written code; then fetch the latest tracker reference for their platform (see **Tracker Reference** below).
+
+   With Snowtype, walk the user through:
+   - Authentication (see **Authentication** below). Do not run `init` or generate code until it is in place.
+   - Creating the configuration: if the project has no Snowtype configuration yet, run `npx snowtype init`, which prompts interactively for the tracker, language, and output path. If the prompts can't be completed in this environment, ask the user to run it themselves or write the configuration file from the configuration reference docs. Then set which event specifications, tracking plans, and data structures to generate code for.
+   - Running code generation and wiring the generated tracking functions into their application.
+   - Keeping the generated code up to date (see **Keep the generated code up to date** below).
 
 4. Whichever way the code is produced, make sure it includes:
    - Tracker initialisation pointing at their **Micro endpoint** for testing or **Mini endpoint** if they don't have a Micro instance (see Stage 2)
@@ -79,14 +85,14 @@ Snowplow CLI manages the tracking definitions as files: it validates them, publi
 
 Snowtype generates type-safe tracking functions from the user's event specifications and data structures, for the tracker and language set in its configuration. It is the recommended way to implement tracking whenever it supports the user's tracker and language: https://docs.snowplow.io/docs/event-studio/implement-tracking/configuration-reference/#supported-trackers-and-languages. The tracker itself is still set up from the tracker reference.
 
-For installation, configuration and commands, use `fetch_documentation_index` to find the Snowtype pages (under `/docs/event-studio/implement-tracking/`) and fetch them with `fetch_documentation_page`, rather than writing them from memory.
+For commands and flags, use the built-in help of each tool (`--help` on the tool or on a command) rather than writing them from memory. For what the help does not cover, such as installation and configuration, use `fetch_documentation_index` to find the Snowtype pages (under `/docs/event-studio/implement-tracking/`) and fetch them with `fetch_documentation_page`.
 
 Run Snowplow CLI with `npx --yes @snowplow/snowplow-cli@latest` rather than an installed binary, so it is always the latest version; `snowplow-cli` below means that command. Run Snowtype with the version installed in the project (`npx snowtype`). If it is older than 0.21.0, upgrade the project's dependency: `login` needs 0.21.0, and `check` and `localDataProducts` need 0.20.0. Without Snowtype in the project, use `npx --yes @snowplow/snowtype@latest`.
 
 ### Authentication
 
-- `npx snowtype login` (with Snowtype installed in the project, otherwise `npx --yes @snowplow/snowtype@latest login`) and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one. Logging out of either logs out of both.
-- An API key takes precedence over the login in both tools. Use an API key where nobody can sign in, such as CI.
+- `npx snowtype login` (with Snowtype installed in the project, otherwise `npx --yes @snowplow/snowtype@latest login`) and `snowplow-cli login` save one browser login that both tools use, so the user logs in with either one and needs no API key. Prefer the login on a developer's machine. Logging out of either logs out of both.
+- An API key takes precedence over the login in both tools. Use an API key only where nobody can sign in, such as CI, and pass it there through the CI system's secrets as environment variables.
 - `snowplow-cli status` shows which one is in use: `auth=login` or `auth=api-key`.
 - Never ask the user to paste a key, token or secret into the conversation, never read, print or search `.env` or the saved login, and never put a key on a command line. Let the tools read their own credentials. `snowplow-cli status` checks Snowplow CLI's credentials and shows the key id but never the key. Snowtype shares them only through the browser login, or when the key is in the environment or in the project's `./.env`: it does not read the global Snowplow CLI configuration.
 
@@ -149,6 +155,7 @@ Always fetch the docs rather than generating tracker code from memory.
 
 ## Important Notes
 
+- When the user is on the Snowtype path, always call the generated tracking functions rather than writing raw tracking calls alongside them — mixing the two defeats the type safety
 - Always use the exact Iglu URI from the user's schema — don't guess versions
 - Include all required fields from the schema; mark optional fields with comments
 - Show the complete tracking call, not just fragments
