@@ -1,6 +1,6 @@
 ---
 name: tracking-design
-description: "Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events, create schemas, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say \"tracking plan.\" Triggers: schema design, tracking plan, event spec, Iglu, entities, data product."
+description: "Design event tracking schemas, entities, and event specifications following Snowplow conventions. Use when the user wants to track new events or user actions, decide what to capture for a user action in their product, create or version schemas, name events and event specifications, or design their tracking plan. Use this skill whenever a user mentions schemas, event design, or instrumentation planning, even if they don't explicitly say \"tracking plan.\" Not for writing tracker code: use implementation-guidance instead. Triggers: schema design, tracking plan, event spec, Iglu, entities, data product, what should I track, design tracking for, event naming, schema version bump, SchemaVer."
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 

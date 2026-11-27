@@ -1,6 +1,6 @@
 ---
 name: troubleshooting
-description: "Diagnose pipeline issues, failed events, schema validation errors, and enrichment problems. Use when users report missing events, validation failures, or pipeline errors. Use this skill whenever events appear to be missing, dropping, or failing, even if the user just says \"something is wrong with my pipeline.\" Triggers: failed events, bad rows, validation error, missing events, enrichment failure, debug."
+description: "Diagnose pipeline issues, failed events, schema validation errors, and enrichment problems. Use when users report missing events, validation failures, or pipeline errors. Use this skill whenever events appear to be missing, dropping, or failing, even if the user only says the pipeline is broken or events stopped arriving. Triggers: failed events, bad rows, validation error, missing events, enrichment failure, debug, events not showing up, pipeline broken."
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
