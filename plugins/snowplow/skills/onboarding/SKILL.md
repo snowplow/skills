@@ -5,8 +5,8 @@ description: >
   app when there is no app to work on, plan what to track, implement the tracking, test that
   the events arrive, and query the collected data. Offer it when a user asks vaguely what the
   agent can do with Snowplow, where to start, or how to get going after signing up for a
-  trial, and run it only when they accept or explicitly ask for the walk-through. Does not
-  trigger on a specific task such as adding an event, designing a schema or fixing a tracker.
+  trial, and run it only when they accept or explicitly ask for the walk-through. Not for a
+  specific task such as adding an event, designing a schema or fixing a tracker.
   Triggers: what can you do with snowplow, where do I start with snowplow, how do I get
   started with snowplow, I just signed up for snowplow, new to snowplow, help me with
   snowplow, snowplow trial, walk me through snowplow onboarding.

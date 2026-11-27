@@ -1,6 +1,6 @@
 ---
 name: implementation-guidance
-description: "Help developers instrument Snowplow trackers in their applications, either by writing tracker code directly or by generating type-safe code with Snowtype. Use when users ask how to send events, configure trackers, or write tracking code. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker, Snowtype, generate tracking code."
+description: "Help developers instrument Snowplow trackers in their applications, either by writing tracker code directly or by generating type-safe code with Snowtype, then test and release the tracking. Use when users ask how to send events, configure trackers, write tracking code for a web, mobile, or server-side app, or test new tracking with Snowplow Micro before sending it to production. Use this skill whenever a user wants to add analytics, instrument an app, or write tracker code, even if they don't name Snowplow explicitly. Not for designing schemas or event specifications: use tracking-design instead. Triggers: tracker code, instrument app, send events, JavaScript tracker, iOS tracker, Android tracker, Node.js tracker, Python tracker, server-side tracking, Snowtype, generate tracking code, test tracking with Micro, go live with tracking."
 compatibility: Requires Node.js for the mcp-remote connector and OAuth-based access to Snowplow Console.
 ---
 
