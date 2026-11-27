@@ -9,6 +9,7 @@ The output of this stage is one row in the progress file with these fields:
 - Project root: the directory every later path is relative to.
 - Target app: platform, framework, boot file, run command, and the app ID and collector when a tracker is already configured, blank otherwise.
 - Existing Console objects to reuse: a source app for the target app, a tracking plan for it, a destination, each when present.
+- Existing analytics: the other analytics tool the target app already sends events to, and what the user chose to do about it, blank when there is none.
 - Tracking definitions: managed from Console or as code, decided as the tracking-design skill describes, before Stage 3 creates anything.
 
 Customer. `get_organization`: `Organization type: trial` means trial, any other type means existing.
@@ -22,6 +23,13 @@ Target app, the thing the tracking goes into. Look at the directory: the languag
 - An app in the directory: instrument it. Record the platform, the framework, the file where it boots and the run command. Any platform with a Snowplow tracker works, the platform table in `references/instrumentation.md` has the per-platform pieces. The app ID is chosen in Stage 3.
 - No app in the directory: say in one line that Stage 1b builds a demo shop, which fills in the app fields. A user who asks for tracking with no code in front of them expects something to click on, not a shell command.
 - A tracker or Snowtype config already present: keep it, record the app ID and the collector it uses, which may differ from the pipeline's, and skip the install parts of Stage 4.
+
+Existing analytics. While scanning the target app, also look for another analytics tool it already sends events to: Segment, RudderStack, Google Analytics 4 or Google Tag Manager, Amplitude, Adobe, or PostHog. Phase 1 of the `existing-analytics` skill lists the packages, calls and script hosts to search for. When one is found, stop and ask the user before Stage 2, naming the tool and the file it was found in:
+
+- Continue the onboarding: design and add native Snowplow tracking next to the tool, which keeps working. This is the path that ends with a first query over the collected data.
+- Switch to the `existing-analytics` skill: send a copy of the events the tool already tracks to Snowplow through an adapter, without retagging, so Snowplow Signals can calculate attributes on them. It needs Signals on the organization.
+
+Record the tool and the answer in the progress file, so a resumed run does not ask again. If the user switches, mark Stage 1 `done` and Stages 1b to 7 `skipped` with the note `handed over to existing-analytics`, then follow that skill. The user can come back to the onboarding later, since both ways of tracking can run side by side. When no such tool is found, say nothing and continue.
 
 Project root, set once the directory is scanned: the current directory when it holds the app or is empty, otherwise a new `snowplow-demo` directory created now. Every later path is relative to it, and the progress file goes in its `docs/`.
 

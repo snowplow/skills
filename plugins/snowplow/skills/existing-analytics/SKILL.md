@@ -19,21 +19,33 @@ Each tool has a tested setup in `references/<tool>.md` and reference mapping scr
 | Adobe | `references/adobe.md` | Web SDK `onBeforeEventSend` callback |
 | PostHog | `references/posthog.md` | `before_send` hook in posthog-js |
 
-The user-facing docs are at https://docs.snowplow.io/docs/signals/data-sources/existing-analytics.md.
+The user-facing docs are at https://docs.snowplow.io/docs/signals/data-sources/existing-analytics.md. If you can't fetch a docs.snowplow.io link directly, read the page with `fetch_documentation_page`.
 
 ## Phase 1: Find the tool and choose the approach
 
-1. Search the codebase for the tool's snippet or SDK: `analytics.load`, `rudderanalytics`, `gtag(`, `googletagmanager.com`, `amplitude.init`, `alloy(`, `s_gi` or `AppMeasurement`, `adobeDataLayer`, `posthog.init`.
-2. If the site loads the tool only through a tag manager, the change is in the tag manager, not the codebase. Tell the user, and give them exact UI steps from the reference file unless you have browser access to that tag manager.
-3. Default to the recommended approach in the table. Use a server-side approach only for events that don't come from a browser (server libraries, mobile apps), or when the user can't change the page. Never send the same browser events through both, or they arrive twice under two visitor keys.
-4. For PostHog, RudderStack, and Amplitude, check whether the tool's official MCP server is connected. If it is, use it to read the event names the site actually sends, so the event-name lists in Phase 3 match.
+1. Search the codebase for the tool. A site loads it from a snippet, from an npm package, or through a tag manager, so search the dependency manifest as well as the source:
+
+   | Tool | Snippet or global | npm package and its entry point | Script host |
+   | --- | --- | --- | --- |
+   | Segment | `analytics.load` | `@segment/analytics-next`: `AnalyticsBrowser.load` | `cdn.segment.com` |
+   | RudderStack | `rudderanalytics` | `@rudderstack/analytics-js`: `new RudderAnalytics()` | `cdn.rudderlabs.com` |
+   | GA4 and GTM | `gtag(`, `dataLayer.push` | `@next/third-parties/google`: `GoogleAnalytics`, `GoogleTagManager`; `react-ga4` | `googletagmanager.com` |
+   | Amplitude | `amplitude.init` | `@amplitude/analytics-browser`: `init`; `@amplitude/unified`: `initAll` | `cdn.amplitude.com` |
+   | Adobe | `alloy(`, `s_gi` or `AppMeasurement`, `adobeDataLayer`, `_satellite` | `@adobe/alloy`: `createInstance` | `assets.adobedtm.com` |
+   | PostHog | `posthog.init` | `posthog-js`: `posthog.init`, often in `instrumentation-client` on Next.js; `PostHogProvider` | `i.posthog.com` |
+
+   The list covers the common entry points, not all of them. If nothing matches, ask the user which tool they use and where it loads. A server or mobile SDK of the same tool, such as `@segment/analytics-node`, `@rudderstack/rudder-sdk-node`, `@amplitude/analytics-node`, or `posthog-node`, means some events don't come from a browser: see step 4.
+2. If you find more than one tool, ask the user which one to send to Snowplow. If the site already loads a Snowplow tracker, tell the user and ask whether they still want the adapter: adapter events and native events for the same action count twice.
+3. If the site loads the tool only through a tag manager, the change is in the tag manager, not the codebase. Tell the user, and give them exact UI steps from the reference file unless you have browser access to that tag manager.
+4. Default to the recommended approach in the table. Use a server-side approach only for events that don't come from a browser (server libraries, mobile apps), or when the user can't change the page. Never send the same browser events through both, or they arrive twice under two visitor keys. If the user also wants history from before the adapter, such as a lifetime order count, see "Warehouse history" in the reference file: batch attributes on the tool's warehouse export need a Signals warehouse connection and refresh periodically, not in real time.
+5. For PostHog, RudderStack, and Amplitude, check whether the tool's official MCP server is connected. If it is, use it to read the event names the site actually sends, so the event-name lists in Phase 3 match.
 
 ## Phase 2: Create the two schemas
 
 Every adapter sends a generic `external_event` and attaches an `external_identity` entity to every event. These schemas aren't on Iglu Central: the user creates them in their own registry, under their own vendor. Until they exist in the environment the Collector validates against, every event fails validation, including page views.
 
-1. Call `list_schemas` to find the user's vendor (the vendor their existing schemas use) and whether `external_event` and `external_identity` already exist. Ask the user to confirm the vendor.
-2. If they don't exist, call `create_schema_version` twice, with `vendor` set to the user's vendor and `version` `1-0-0`. Take `name`, `description`, and the `schema` body (`type`, `properties`, `required`, `additionalProperties`) unchanged from `references/schemas/external_event.json` and `references/schemas/external_identity.json`. Use `type: event` for `external_event` and `type: entity` for `external_identity`. Change nothing else: the scripts depend on the field names and limits.
+1. Call `list_schemas` to find the user's vendor (the vendor their existing schemas use) and whether `external_event` and `external_identity` already exist. If the registry has no schemas yet, start from the default vendor in `get_organization`; on a trial it comes from the sign-up email, so it can be a mail provider such as `com.gmail` rather than the company's domain. Ask the user to confirm the vendor.
+2. If they exist, call `get_schema_properties` on each and check that the fields match the bundled copies. If they differ, stop and tell the user: the scripts are written against the bundled fields. If they don't exist, call `create_schema_version` twice, with `vendor` set to the user's vendor and `version` `1-0-0`. Take `name`, `description`, and the `schema` body (`type`, `properties`, `required`, `additionalProperties`) unchanged from `references/schemas/external_event.json` and `references/schemas/external_identity.json`. Use `type: event` for `external_event` and `type: entity` for `external_identity`. Change nothing else: the scripts depend on the field names and limits.
 3. Confirm both are deployed to the development environment before testing. Promote them to production with `promote_data_structure` only after the user explicitly approves.
 4. If the repository manages schemas through CI/CD, add the two schema files there instead, with `com.example` in `self.vendor` replaced by the user's vendor, and tell the user which merge publishes them.
 
@@ -50,10 +62,11 @@ Every adapter sends a generic `external_event` and attaches an `external_identit
 2. Check with `list_micro_events` and `get_micro_event`, or `get_failed_events_metrics` and `get_failed_event_detail` on a pipeline, that the events in the reference file's "Check it works" list arrive and none failed.
 3. If you changed the scripts beyond the adaptation points, also check each event against [the mapping contract](#the-mapping-contract): the rung it took, the schemas and entities, `external_identity` on every event, and the user ID only in `user_id` fields, never in `domain_userid` or `anonymous_id`.
 4. Fix failures before you switch to the production Collector. A failure on every event usually means the two schemas aren't deployed to that environment, or the vendor in the script doesn't match the vendor the schemas were created under.
+5. After the switch, send the same events again. Check with `get_pipeline_metrics` that the pipeline receives events for the app ID, and with `get_failed_events_metrics` that none failed.
 
 ## Phase 5: Privacy, then attributes
 
-1. Walk through the privacy points in Important Notes with the user before production traffic.
+1. Walk through the privacy points in Important Notes with the user before production traffic. `get_collector_config` shows the Collector's domain, which tells you whether it is on the same site as the pages.
 2. If Signals isn't set up in the project yet, hand over to `signals-setup`. Otherwise hand over to `signals` to build attribute groups and interventions for the user's use case, passing on the facts in [Attributes on adapter events](#attributes-on-adapter-events).
 3. To deliver interventions to the page, follow `references/interventions.md`.
 
@@ -87,30 +100,40 @@ When handing over to `signals`, pass on these facts:
 - Ecommerce attributes read `snowplow_ecommerce_action` `type` with the `product` and `transaction` entities. One attribute reads one product entity per event.
 - Key visitor groups on `domain_userid` and session groups on `domain_sessionid`. Session groups on server-side approaches work only on PostHog and Amplitude.
 - Attributes without a time window expire after 7 days without an update. For values meant to persist, such as the first referrer, current plan, or account ID, set `ttl` to 365 days (the **Time to live (TTL)** field in Console).
+- On a client-side approach, attributes update within about a second of each event, and interventions typically reach the page in 1 to 2 seconds. A server-side approach first waits for the tool's queue, which adds from several seconds to a minute or more. The first events after publishing an attribute group or intervention can take a minute or more, so don't read that as a failure when testing.
 - Build groups for the user's use case. Don't offer a generic set of starter groups.
 
 ## Important Notes
 
 - **Send the user ID as the tool holds it.** Never hash, drop, or rewrite it. The scripts make two exceptions to fit field limits: IDs over 128 characters are hashed into `domain_userid` and `network_userid`, and user IDs over 255 characters are truncated in `user_id` and `external_identity.user_id`.
-- **Don't add properties that aren't schema fields.** Signals only reads declared fields. If the user needs a property `external_event` doesn't have, track that event natively instead: https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/move-to-native-tracking.md.
+- **Don't add properties that aren't schema fields.** Signals only reads declared fields. If the user needs a property `external_event` doesn't have, track that event natively instead: https://docs.snowplow.io/docs/signals/data-sources/existing-analytics/move-to-native-tracking.md. Stop the adapter from forwarding an event once it's tracked natively, or it's counted twice. On a server-side approach, attributes keyed on `domain_userid` start again from empty after the move, because the key changes from the tool's ID to the tracker's; that page lists the ways to bridge them.
 - **Schema versions can only be created, never edited.** If the user needs a field the schema lacks, that's native tracking, not a new `external_event` version: the scripts are written against 1-0-0.
+- **The adapter sees each event as the page sent it.** The tool's own processing, such as Adobe visits, eVar persistence, or bot filtering, doesn't reach Snowplow.
+- **Some approaches aren't validated in a full workspace yet.** They were tested outside the tool, or by review only: the Segment Destination Function, every RudderStack approach in a RudderStack Cloud workspace (the transformation ran on a self-hosted server, the HTTP Webhook mappings were only reviewed), the Amplitude Webhook template, Adobe Tags and Adobe event forwarding, and server-side GTM on a hosted tagging server. Tell the user when you install one of these, and don't skip Phase 4.
 - **Privacy.** Before production traffic, agree these with whoever owns privacy for the site:
   - Whether user IDs that are email addresses may reach Snowplow. The adapters send them unchanged.
-  - Whether page URLs with query strings, and search terms, may reach Snowplow.
-  - On client-side approaches with a Collector on the same site as the pages, the browser sends the tool's cookies to the Collector (for example Segment's `ajs_user_id`). Fix with a Collector on another site, or `credentials: 'omit'` in `newTracker`.
+  - Whether page URLs with query strings, referrers, and search terms may reach Snowplow: they can hold emails or tokens.
+  - Whether free text in a property mapped to an `external_event` field may reach Snowplow. On Adobe, check which eVars, props, and XDM fields are mapped.
+  - Whether IP addresses must be truncated. If so, use the pipeline's IP anonymization.
+  - On client-side approaches with a Collector on the same site as the pages, the browser sends the tool's cookies to the Collector (for example Segment's `ajs_user_id`). Fix with a Collector on another site, or `credentials: 'omit'` in `newTracker`, or on the `fetch` call of Amplitude's variant without the tracker.
   - Consent: the Adobe callbacks and the PostHog hook follow the tool's consent state. Segment, RudderStack, and Amplitude client-side adapters run on every event the tool processes. GTM tag templates follow only the consent settings given to the Snowplow tags. The GA4 page script ignores Consent Mode, so load it only after consent. Server-side GTM needs the consent condition in `references/ga4-and-google-tag-manager.md`. Other server-side destinations forward everything the tool ingests. Gate loading the Snowplow tracker on the same consent signal as the tool.
 
 ## Tools
 
+- `get_organization` — the default vendor, when the registry has no schemas to take it from
 - `list_schemas` — find the user's vendor and whether `external_event` and `external_identity` exist and are deployed
+- `get_schema_properties` — check that existing `external_event` and `external_identity` schemas match the bundled copies
 - `create_schema_version` — create the two schemas under the user's vendor
 - `promote_data_structure` — promote the schemas to production, after explicit approval
 - `search_iglu_central` — check Snowplow's and Google's schemas the adapters use
 - `list_pipelines` — find Collector endpoints
+- `get_collector_config` — the Collector's domain, to tell whether it is on the same site as the pages
 - `list_micros` — find the Console development environment for testing
 - `list_micro_events` — check which test events arrived and why any failed
 - `get_micro_event` — read one test event in full
+- `get_pipeline_metrics` — check that events for the app ID arrive at the pipeline after the switch to production
 - `get_failed_events_metrics` — failed event counts on a pipeline
 - `get_failed_event_detail` — why a pipeline event failed
 - `list_signals_environments` — check that Signals is set up
 - `list_source_apps` — reuse an existing app ID
+- `fetch_documentation_page` — read a docs.snowplow.io page when the link can't be fetched directly
