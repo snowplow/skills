@@ -31,8 +31,8 @@ The user-facing docs are at https://docs.snowplow.io/docs/signals/data-sources/e
    | RudderStack | `rudderanalytics` | `@rudderstack/analytics-js`: `new RudderAnalytics()` | `cdn.rudderlabs.com` |
    | GA4 and GTM | `gtag(`, `dataLayer.push` | `@next/third-parties/google`: `GoogleAnalytics`, `GoogleTagManager`; `react-ga4` | `googletagmanager.com` |
    | Amplitude | `amplitude.init` | `@amplitude/analytics-browser`: `init`; `@amplitude/unified`: `initAll` | `cdn.amplitude.com` |
-   | Adobe | `alloy(`, `s_gi` or `AppMeasurement`, `adobeDataLayer`, `_satellite` | `@adobe/alloy`: `createInstance` | `assets.adobedtm.com` |
-   | PostHog | `posthog.init` | `posthog-js`: `posthog.init`, often in `instrumentation-client` on Next.js; `PostHogProvider` | `i.posthog.com` |
+   | Adobe | `alloy(`, `s_gi` or `AppMeasurement`, `adobeDataLayer`, `_satellite` | `@adobe/alloy`: `createInstance` | `assets.adobedtm.com` (Tags), `cdn1.adoberesources.net/alloy/` (standalone Web SDK) |
+   | PostHog | `posthog.init` | `posthog-js`: `posthog.init`, often in `instrumentation-client` on Next.js; `PostHogProvider` from `@posthog/react` or, in older setups, `posthog-js/react` | `*.i.posthog.com` |
 
    The list covers the common entry points, not all of them. If nothing matches, ask the user which tool they use and where it loads. A server or mobile SDK of the same tool, such as `@segment/analytics-node`, `@rudderstack/rudder-sdk-node`, `@amplitude/analytics-node`, or `posthog-node`, means some events don't come from a browser: see step 4.
 2. If you find more than one tool, ask the user which one to send to Snowplow. If the site already loads a Snowplow tracker, tell the user and ask whether they still want the adapter: adapter events and native events for the same action count twice.
